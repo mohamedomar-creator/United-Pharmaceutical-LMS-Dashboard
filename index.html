@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>United Pharmacies - LMS Dashboard</title>
+    <title>United Pharmaceutical - LMS Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -378,7 +378,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>United Pharmacies</h1>
+            <h1>United Pharmaceutical</h1>
             <p>Learning Management System - Course Completion Rates</p>
         </div>
 
@@ -810,21 +810,25 @@
                 dropdown.appendChild(div);
             });
 
-            // Open/close dropdown
+            // Open/close dropdown - Fix the click event
             trigger.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                dropdown.classList.toggle('show');
                 
-                // Close other dropdowns
+                // Close all other dropdowns first
                 document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
                     if (dd !== dropdown) {
                         dd.classList.remove('show');
                     }
                 });
+                
+                // Toggle current dropdown
+                dropdown.classList.toggle('show');
             });
 
             // Handle checkbox changes
             dropdown.addEventListener('change', (e) => {
+                e.stopPropagation();
                 if (e.target.type === 'checkbox') {
                     const value = e.target.value;
                     if (e.target.checked) {
@@ -840,6 +844,11 @@
                     updateSelectedItems(selectedContainer, selectedArray, containerId);
                     applyFilters();
                 }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            dropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
             });
 
             // Close dropdown when clicking outside
@@ -1431,25 +1440,43 @@
 
         // Clear all filters
         function clearAllFilters() {
+            // Clear text inputs
             document.getElementById('pharmacistSearch').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('courseTypeFilter').value = '';
             document.getElementById('dateFrom').value = '';
             document.getElementById('dateTo').value = '';
             
+            // Clear select dropdowns
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('courseTypeFilter').value = '';
+            
+            // Clear multi-select arrays
             selectedCities.length = 0;
             selectedSupervisors.length = 0;
             selectedDistricts.length = 0;
             selectedCourses.length = 0;
             
-            updateSelectedItems(document.getElementById('selectedCities'), selectedCities, 'cityMultiSelect');
-            updateSelectedItems(document.getElementById('selectedSupervisors'), selectedSupervisors, 'supervisorMultiSelect');
-            updateSelectedItems(document.getElementById('selectedDistricts'), selectedDistricts, 'districtMultiSelect');
-            updateSelectedItems(document.getElementById('selectedCourses'), selectedCourses, 'courseMultiSelect');
+            // Clear selected items display
+            const selectedCitiesContainer = document.getElementById('selectedCities');
+            const selectedSupervisorsContainer = document.getElementById('selectedSupervisors');
+            const selectedDistrictsContainer = document.getElementById('selectedDistricts');
+            const selectedCoursesContainer = document.getElementById('selectedCourses');
+            
+            if (selectedCitiesContainer) selectedCitiesContainer.innerHTML = '';
+            if (selectedSupervisorsContainer) selectedSupervisorsContainer.innerHTML = '';
+            if (selectedDistrictsContainer) selectedDistrictsContainer.innerHTML = '';
+            if (selectedCoursesContainer) selectedCoursesContainer.innerHTML = '';
             
             // Uncheck all checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
             
+            // Close all dropdowns
+            document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
+                dd.classList.remove('show');
+            });
+            
+            // Reapply filters (which will show all data since filters are cleared)
             applyFilters();
         }
 
