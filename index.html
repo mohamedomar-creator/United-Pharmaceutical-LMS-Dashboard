@@ -285,6 +285,11 @@
             background: #f8f9fa;
             border-radius: 15px;
             padding: 20px;
+            height: 400px; /* Fixed height for all charts */
+        }
+
+        .chart-wrapper canvas {
+            max-height: 320px !important; /* Maximum height for canvas */
         }
 
         .chart-title {
@@ -293,6 +298,18 @@
             margin-bottom: 20px;
             color: #333;
             text-align: center;
+        }
+
+        /* Special styling for status chart container */
+        .status-chart-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            height: 450px; /* Slightly taller for pie chart */
+        }
+
+        .status-chart-container canvas {
+            max-height: 350px !important;
         }
 
         .table-container {
@@ -557,9 +574,9 @@
                 </div>
             </div>
 
-            <div class="chart-wrapper">
+            <div class="status-chart-container">
                 <h3 class="chart-title">📊 Status Distribution</h3>
-                <div style="max-width: 400px; margin: 0 auto;">
+                <div style="max-width: 350px; margin: 0 auto; height: 300px;">
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
@@ -1104,7 +1121,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* This allows height control */
                     plugins: {
                         legend: { display: false }
                     },
@@ -1174,7 +1191,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* Allows height control */
                     indexAxis: 'y',
                     plugins: {
                         legend: { display: false }
@@ -1243,7 +1260,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* Allows height control */
                     plugins: {
                         legend: { display: false }
                     },
@@ -1301,7 +1318,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* Fixed height */
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -1350,7 +1367,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* Fixed height */
                     scales: {
                         r: {
                             beginAtZero: true,
@@ -1403,7 +1420,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, /* Fixed height */
                     plugins: {
                         legend: { display: false }
                     },
@@ -1454,7 +1471,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: true, /* Keep aspect ratio for pie chart */
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -1469,4 +1486,3 @@
     </script>
 </body>
 </html>
-
