@@ -1535,3 +1535,8 @@
 
         // Initialize the application
         loadData();
+// Fix: make sure multi-select filters apply correctly
+document.querySelectorAll('.multi-select-dropdown input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
+
