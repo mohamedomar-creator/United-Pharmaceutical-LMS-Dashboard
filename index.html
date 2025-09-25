@@ -631,699 +631,675 @@
         }, 50);
     }
 </script>
-        // عرض البيانات في الجدول
-        function displayData(data) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
+      // Display data in the table
+function displayData(data) {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
 
-            data.forEach(pharmacist => {
-                const row = tableBody.insertRow();
-                
-                row.innerHTML = `
-                    <td><strong>${pharmacist.name}</strong></td>
-                    <td>${pharmacist.city}</td>
-                    <td>${pharmacist.district}</td>
-                    <td>${pharmacist.supervisor}</td>
-                    <td>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${pharmacist.completion}%"></div>
-                        </div>
-                        <small><strong>${pharmacist.completion}%</strong></small>
-                    </td>
-                    <td>
-                        <span class="status-badge status-${pharmacist.status === 'مكتمل' ? 'completed' : pharmacist.status === 'في التقدم' ? 'progress' : 'pending'}">
-                            ${pharmacist.status}
-                        </span>
-                    </td>
-                    <td>${pharmacist.dateCompleted}</td>
-                `;
-            });
-        }
+    data.forEach(pharmacist => {
+        const row = tableBody.insertRow();
+        
+        row.innerHTML = `
+            <td><strong>${pharmacist.name}</strong></td>
+            <td>${pharmacist.city}</td>
+            <td>${pharmacist.district}</td>
+            <td>${pharmacist.supervisor}</td>
+            <td>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${pharmacist.completion}%"></div>
+                </div>
+                <small><strong>${pharmacist.completion}%</strong></small>
+            </td>
+            <td>
+                <span class="status-badge status-${pharmacist.status === 'Completed' ? 'completed' : pharmacist.status === 'In Progress' ? 'progress' : 'Pending'}">
+                    ${pharmacist.status}
+                </span>
+            </td>
+            <td>${pharmacist.dateCompleted}</td>
+        `;
+    });
+}
 
-        // إعداد Multi-Select
-        function setupMultiSelect(containerId, dropdownId, selectedId, options, selectedArray) {
-            const container = document.getElementById(containerId);
-            const dropdown = document.getElementById(dropdownId);
-            const selectedContainer = document.getElementById(selectedId);
-            const trigger = container.querySelector('.search-input');
+// Setup Multi-Select
+function setupMultiSelect(containerId, dropdownId, selectedId, options, selectedArray) {
+    const container = document.getElementById(containerId);
+    const dropdown = document.getElementById(dropdownId);
+    const selectedContainer = document.getElementById(selectedId);
+    const trigger = container.querySelector('.search-input');
 
-            // إنشاء الخيارات
-            dropdown.innerHTML = '';
-            options.forEach(option => {
-                const div = document.createElement('div');
-                div.className = 'multi-select-option';
-                div.innerHTML = `
-                    <input type="checkbox" id="${containerId}_${option}" value="${option}">
-                    <label for="${containerId}_${option}">${option}</label>
-                `;
-                dropdown.appendChild(div);
-            });
+    // Create options
+    dropdown.innerHTML = '';
+    options.forEach(option => {
+        const div = document.createElement('div');
+        div.className = 'multi-select-option';
+        div.innerHTML = `
+            <input type="checkbox" id="${containerId}_${option}" value="${option}">
+            <label for="${containerId}_${option}">${option}</label>
+        `;
+        dropdown.appendChild(div);
+    });
 
-            // فتح/إغلاق القائمة
-            trigger.addEventListener('click', () => {
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-            });
+    // Toggle dropdown
+    trigger.addEventListener('click', () => {
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
 
-            // اختيار العناصر
-            dropdown.addEventListener('change', (e) => {
-                if (e.target.type === 'checkbox') {
-                    const value = e.target.value;
-                    if (e.target.checked) {
-                        if (!selectedArray.includes(value)) {
-                            selectedArray.push(value);
-                        }
-                    } else {
-                        const index = selectedArray.indexOf(value);
-                        if (index > -1) {
-                            selectedArray.splice(index, 1);
-                        }
-                    }
-                    updateSelectedItems(selectedContainer, selectedArray);
-                    applyFilters();
-                }
-            });
-
-            // إغلاق القائمة عند النقر خارجها
-            document.addEventListener('click', (e) => {
-                if (!container.contains(e.target)) {
-                    dropdown.style.display = 'none';
-                }
-            });
-        }
-
-        // تحديث العناصر المختارة
-        function updateSelectedItems(container, selectedArray) {
-            container.innerHTML = '';
-            selectedArray.forEach(item => {
-                const span = document.createElement('span');
-                span.className = 'selected-item';
-                span.innerHTML = `
-                    ${item}
-                    <span class="remove-item" data-value="${item}">×</span>
-                `;
-                container.appendChild(span);
-            });
-
-            // إزالة العناصر
-            container.addEventListener('click', (e) => {
-                if (e.target.classList.contains('remove-item')) {
-                    const value = e.target.getAttribute('data-value');
-                    const index = selectedArray.indexOf(value);
-                    if (index > -1) {
-                        selectedArray.splice(index, 1);
-                        updateSelectedItems(container, selectedArray);
-                        
-                        // إلغاء تحديد الـ checkbox
-                        const checkbox = document.getElementById(`${container.closest('.multi-select').id}_${value}`);
-                        if (checkbox) checkbox.checked = false;
-                        
-                        applyFilters();
-                    }
-                }
-            });
-        }
-
-        // تطبيق الفلاتر
-        function applyFilters() {
-            const searchTerm = document.getElementById('pharmacistSearch').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-
-            filteredData = pharmacistsData.filter(pharmacist => {
-                const matchesSearch = pharmacist.name.toLowerCase().includes(searchTerm);
-                const matchesStatus = statusFilter === '' || pharmacist.status === statusFilter;
-                const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
-                const matchesSupervisor = selectedSupervisors.length === 0 || selectedSupervisors.includes(pharmacist.supervisor);
-                const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(pharmacist.district);
-                
-                let matchesDate = true;
-                if (dateFrom || dateTo) {
-                    const pharmacistDate = new Date(pharmacist.dateCompleted);
-                    if (dateFrom && pharmacistDate < new Date(dateFrom)) matchesDate = false;
-                    if (dateTo && pharmacistDate > new Date(dateTo)) matchesDate = false;
-                }
-
-                return matchesSearch && matchesStatus && matchesCity && 
-                       matchesSupervisor && matchesDistrict && matchesDate;
-            });
-
-            displayData(filteredData);
-            updateStats();
-            updateAllCharts();
-        }
-
-        // رسم مخططات المقارنة
-        function createComparisonCharts() {
-            createCitiesChart();
-            createSupervisorsChart();
-            createDistrictsChart();
-            createPharmacistsChart();
-            createStatusPieChart();
-        }
-
-        // مخطط مقارنة المدن
-        function createCitiesChart() {
-            const ctx = document.getElementById('citiesChart').getContext('2d');
-            
-            // تجميع البيانات حسب المدن
-            const cityStats = {};
-            const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city))];
-            
-            citiesToShow.forEach(city => {
-                const cityData = filteredData.filter(p => p.city === city);
-                if (cityData.length > 0) {
-                    cityStats[city] = {
-                        average: Math.round(cityData.reduce((sum, p) => sum + p.completion, 0) / cityData.length),
-                        count: cityData.length,
-                        completed: cityData.filter(p => p.status === 'مكتمل').length
-                    };
-                }
-            });
-
-            const labels = Object.keys(cityStats);
-            const averages = labels.map(city => cityStats[city].average);
-            const counts = labels.map(city => cityStats[city].count);
-
-            if (citiesChart) {
-                citiesChart.destroy();
+    // Select items
+    dropdown.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            const value = e.target.value;
+            if (e.target.checked) {
+                if (!selectedArray.includes(value)) selectedArray.push(value);
+            } else {
+                const index = selectedArray.indexOf(value);
+                if (index > -1) selectedArray.splice(index, 1);
             }
-
-            citiesChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'متوسط معدل الإنجاز (%)',
-                            data: averages,
-                            backgroundColor: 'rgba(0, 102, 204, 0.8)',
-                            borderColor: 'rgba(0, 102, 204, 1)',
-                            borderWidth: 2,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'عدد الصيادلة',
-                            data: counts,
-                            backgroundColor: 'rgba(40, 167, 69, 0.8)',
-                            borderColor: 'rgba(40, 167, 69, 1)',
-                            borderWidth: 2,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: { family: 'Segoe UI' }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    if (context.datasetIndex === 0) {
-                                        return `عدد المكتملين: ${cityStats[context.label].completed}`;
-                                    }
-                                    return '';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'معدل الإنجاز (%)'
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'عدد الصيادلة'
-                            },
-                            grid: {
-                                drawOnChartArea: false,
-                            },
-                        }
-                    }
-                }
-            });
-        }
-
-        // مخطط مقارنة المشرفين
-        function createSupervisorsChart() {
-            const ctx = document.getElementById('supervisorsChart').getContext('2d');
-            
-            const supervisorStats = {};
-            const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor))];
-            
-            supervisorsToShow.forEach(supervisor => {
-                const supervisorData = filteredData.filter(p => p.supervisor === supervisor);
-                if (supervisorData.length > 0) {
-                    supervisorStats[supervisor] = {
-                        average: Math.round(supervisorData.reduce((sum, p) => sum + p.completion, 0) / supervisorData.length),
-                        count: supervisorData.length,
-                        completed: supervisorData.filter(p => p.status === 'مكتمل').length
-                    };
-                }
-            });
-
-            const labels = Object.keys(supervisorStats).map(name => name.replace('د. ', ''));
-            const averages = Object.keys(supervisorStats).map(supervisor => supervisorStats[supervisor].average);
-            const counts = Object.keys(supervisorStats).map(supervisor => supervisorStats[supervisor].count);
-
-            if (supervisorsChart) {
-                supervisorsChart.destroy();
-            }
-
-            supervisorsChart = new Chart(ctx, {
-                type: 'horizontalBar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'متوسط معدل الإنجاز (%)',
-                        data: averages,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 205, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(153, 102, 255, 0.8)',
-                            'rgba(255, 159, 64, 0.8)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: { family: 'Segoe UI' }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    const supervisor = Object.keys(supervisorStats)[context.dataIndex];
-                                    return `عدد الصيادلة: ${supervisorStats[supervisor].count}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'معدل الإنجاز (%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // مخطط مقارنة المناطق
-        function createDistrictsChart() {
-            const ctx = document.getElementById('districtsChart').getContext('2d');
-            
-            const districtStats = {};
-            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district))];
-            
-            districtsToShow.forEach(district => {
-                const districtData = filteredData.filter(p => p.district === district);
-                if (districtData.length > 0) {
-                    districtStats[district] = {
-                        average: Math.round(districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length),
-                        count: districtData.length,
-                        completed: districtData.filter(p => p.status === 'مكتمل').length
-                    };
-                }
-            });
-
-            const labels = Object.keys(districtStats);
-            const averages = labels.map(district => districtStats[district].average);
-
-            if (districtsChart) {
-                districtsChart.destroy();
-            }
-
-            districtsChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'معدل الإنجاز (%)',
-                        data: averages,
-                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
-                        borderColor: 'rgba(0, 102, 204, 1)',
-                        pointBackgroundColor: 'rgba(0, 102, 204, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(0, 102, 204, 1)',
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: { family: 'Segoe UI' }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // مخطط أفضل الصيادلة
-        function createPharmacistsChart() {
-            const ctx = document.getElementById('pharmacistsChart').getContext('2d');
-            
-            // ترتيب الصيادلة حسب معدل الإنجاز وأخذ أفضل 10
-            const sortedPharmacists = filteredData
-                .sort((a, b) => b.completion - a.completion)
-                .slice(0, 10);
-
-            const labels = sortedPharmacists.map(p => p.name.split(' ').slice(0, 2).join(' '));
-            const completions = sortedPharmacists.map(p => p.completion);
-
-            // ألوان متدرجة من الأخضر إلى الأحمر
-            const colors = sortedPharmacists.map((p, index) => {
-                const ratio = (sortedPharmacists.length - index) / sortedPharmacists.length;
-                const red = Math.round(255 * (1 - ratio));
-                const green = Math.round(255 * ratio);
-                return `rgba(${red}, ${green}, 0, 0.8)`;
-            });
-
-            if (pharmacistsChart) {
-                pharmacistsChart.destroy();
-            }
-
-            pharmacistsChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'معدل الإنجاز (%)',
-                        data: completions,
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: colors.map(color => color.replace('0.8', '1'))
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    return sortedPharmacists[context[0].dataIndex].name;
-                                },
-                                afterLabel: function(context) {
-                                    const pharmacist = sortedPharmacists[context.dataIndex];
-                                    return [
-                                        `المدينة: ${pharmacist.city}`,
-                                        `المشرف: ${pharmacist.supervisor}`,
-                                        `الحالة: ${pharmacist.status}`
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'معدل الإنجاز (%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // مخطط دائري للحالات
-        function createStatusPieChart() {
-            const ctx = document.getElementById('statusPieChart').getContext('2d');
-            
-            const completed = filteredData.filter(p => p.status === 'مكتمل').length;
-            const progress = filteredData.filter(p => p.status === 'في التقدم').length;
-            const pending = filteredData.filter(p => p.status === 'معلق').length;
-
-            if (statusPieChart) {
-                statusPieChart.destroy();
-            }
-
-            statusPieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['مكتمل', 'في التقدم', 'معلق'],
-                    datasets: [{
-                        data: [completed, progress, pending],
-                        backgroundColor: [
-                            'rgba(40, 167, 69, 0.8)',
-                            'rgba(255, 193, 7, 0.8)',
-                            'rgba(220, 53, 69, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(40, 167, 69, 1)',
-                            'rgba(255, 193, 7, 1)',
-                            'rgba(220, 53, 69, 1)'
-                        ],
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { 
-                                    family: 'Segoe UI',
-                                    size: 14
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
-                                    const percentage = Math.round((context.parsed / total) * 100);
-                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        function createChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            // إنشاء بيانات وهمية للمخطط
-            const dates = [];
-            const completionRates = [];
-            
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                dates.push(date.toLocaleDateString('ar-SA'));
-                
-                // حساب متوسط الإنجاز لكل يوم (بيانات وهمية)
-                const dayData = filteredData.filter(p => {
-                    const pDate = new Date(p.dateCompleted);
-                    return pDate.toDateString() === date.toDateString();
-                });
-                
-                const avgCompletion = dayData.length > 0 
-                    ? dayData.reduce((sum, p) => sum + p.completion, 0) / dayData.length
-                    : Math.random() * 30 + 50; // بيانات عشوائية للعرض
-                    
-                completionRates.push(Math.round(avgCompletion));
-            }
-
-            performanceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'معدل الإنجاز اليومي (%)',
-                        data: completionRates,
-                        borderColor: '#0066cc',
-                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: {
-                                    family: 'Segoe UI'
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // تحديث جميع المخططات
-        function updateAllCharts() {
-            updateChart();
-            updateComparisonCharts();
-        }
-
-        // تحديث مخططات المقارنة
-        function updateComparisonCharts() {
-            createCitiesChart();
-            createSupervisorsChart();
-            createDistrictsChart();
-            createPharmacistsChart();
-            createStatusPieChart();
-        }
-
-        // رسم المخطط الرئيسي
-        function updateChart() {
-            if (performanceChart) {
-                // تحديث بيانات المخطط حسب الفلاتر المطبقة
-                const dates = [];
-                const completionRates = [];
-                
-                for (let i = 30; i >= 0; i--) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    dates.push(date.toLocaleDateString('ar-SA'));
-                    
-                    const dayData = filteredData.filter(p => {
-                        const pDate = new Date(p.dateCompleted);
-                        return Math.abs(pDate - date) < 24 * 60 * 60 * 1000;
-                    });
-                    
-                    const avgCompletion = dayData.length > 0 
-                        ? dayData.reduce((sum, p) => sum + p.completion, 0) / dayData.length
-                        : Math.random() * 20 + 60;
-                        
-                    completionRates.push(Math.round(avgCompletion));
-                }
-
-                performanceChart.data.labels = dates;
-                performanceChart.data.datasets[0].data = completionRates;
-                performanceChart.update();
-            }
-        }
-
-        // مسح جميع الفلاتر
-        function clearAllFilters() {
-            document.getElementById('pharmacistSearch').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-            
-            selectedCities.length = 0;
-            selectedSupervisors.length = 0;
-            selectedDistricts.length = 0;
-            
-            updateSelectedItems(document.getElementById('selectedCities'), selectedCities);
-            updateSelectedItems(document.getElementById('selectedSupervisors'), selectedSupervisors);
-            updateSelectedItems(document.getElementById('selectedDistricts'), selectedDistricts);
-            
-            // إلغاء تحديد جميع checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            
+            updateSelectedItems(selectedContainer, selectedArray);
             applyFilters();
         }
+    });
 
-        // تهيئة الفلاتر
-        function initializeFilters() {
-            const cities = [...new Set(pharmacistsData.map(p => p.city))];
-            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor))];
-            const districts = [...new Set(pharmacistsData.map(p => p.district))];
-            
-            setupMultiSelect('cityMultiSelect', 'cityDropdown', 'selectedCities', cities, selectedCities);
-            setupMultiSelect('supervisorMultiSelect', 'supervisorDropdown', 'selectedSupervisors', supervisors, selectedSupervisors);
-            setupMultiSelect('districtMultiSelect', 'districtDropdown', 'selectedDistricts', districts, selectedDistricts);
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            dropdown.style.display = 'none';
         }
+    });
+}
 
-        // محاكاة تحميل البيانات
-        function loadData() {
-            setTimeout(() => {
-                document.getElementById('loadingMessage').style.display = 'none';
-                document.getElementById('dataTable').style.display = 'table';
+// Update selected items
+function updateSelectedItems(container, selectedArray) {
+    container.innerHTML = '';
+    selectedArray.forEach(item => {
+        const span = document.createElement('span');
+        span.className = 'selected-item';
+        span.innerHTML = `
+            ${item}
+            <span class="remove-item" data-value="${item}">×</span>
+        `;
+        container.appendChild(span);
+    });
+
+    // Remove items
+    container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-item')) {
+            const value = e.target.getAttribute('data-value');
+            const index = selectedArray.indexOf(value);
+            if (index > -1) {
+                selectedArray.splice(index, 1);
+                updateSelectedItems(container, selectedArray);
                 
-                displayData(pharmacistsData);
-                updateStats();
-                initializeFilters();
-                createChart();
-                createComparisonCharts();
-            }, 2000);
+                // Uncheck checkbox
+                const checkbox = document.getElementById(`${container.closest('.multi-select').id}_${value}`);
+                if (checkbox) checkbox.checked = false;
+                
+                applyFilters();
+            }
+        }
+    });
+}
+
+// Apply filters
+function applyFilters() {
+    const searchTerm = document.getElementById('pharmacistSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+
+    filteredData = pharmacistsData.filter(pharmacist => {
+        const matchesSearch = pharmacist.name.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === '' || pharmacist.status === statusFilter;
+        const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
+        const matchesSupervisor = selectedSupervisors.length === 0 || selectedSupervisors.includes(pharmacist.supervisor);
+        const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(pharmacist.district);
+        
+        let matchesDate = true;
+        if (dateFrom || dateTo) {
+            const pharmacistDate = new Date(pharmacist.dateCompleted);
+            if (dateFrom && pharmacistDate < new Date(dateFrom)) matchesDate = false;
+            if (dateTo && pharmacistDate > new Date(dateTo)) matchesDate = false;
         }
 
-        // ربط الأحداث
-        document.getElementById('pharmacistSearch').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('dateFrom').addEventListener('change', applyFilters);
-        document.getElementById('dateTo').addEventListener('change', applyFilters);
-        document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+        return matchesSearch && matchesStatus && matchesCity && 
+               matchesSupervisor && matchesDistrict && matchesDate;
+    });
 
-        // تشغيل التطبيق
-        loadData();
-    </script>
-</body>
+    displayData(filteredData);
+    updateStats();
+    updateAllCharts();
+}
 
-</html>
+// Create comparison charts
+function createComparisonCharts() {
+    createCitiesChart();
+    createSupervisorsChart();
+    createDistrictsChart();
+    createPharmacistsChart();
+    createStatusPieChart();
+}
 
+// Cities comparison chart
+function createCitiesChart() {
+    const ctx = document.getElementById('citiesChart').getContext('2d');
+    
+    // Aggregate data by city
+    const cityStats = {};
+    const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city))];
+    
+    citiesToShow.forEach(city => {
+        const cityData = filteredData.filter(p => p.city === city);
+        if (cityData.length > 0) {
+            cityStats[city] = {
+                average: Math.round(cityData.reduce((sum, p) => sum + p.completion, 0) / cityData.length),
+                count: cityData.length,
+                completed: cityData.filter(p => p.status === 'Completed').length
+            };
+        }
+    });
+
+    const labels = Object.keys(cityStats);
+    const averages = labels.map(city => cityStats[city].average);
+    const counts = labels.map(city => cityStats[city].count);
+
+    if (citiesChart) {
+        citiesChart.destroy();
+    }
+
+    citiesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Average Completion Rate (%)',
+                    data: averages,
+                    backgroundColor: 'rgba(0, 102, 204, 0.8)',
+                    borderColor: 'rgba(0, 102, 204, 1)',
+                    borderWidth: 2,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Number of Pharmacists',
+                    data: counts,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 2,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: { family: 'Segoe UI' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            if (context.datasetIndex === 0) {
+                                return `Completed: ${cityStats[context.label].completed}`;
+                            }
+                            return '';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Pharmacists'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+}
+        // Supervisors comparison chart
+function createSupervisorsChart() {
+    const ctx = document.getElementById('supervisorsChart').getContext('2d');
+    
+    const supervisorStats = {};
+    const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor))];
+    
+    supervisorsToShow.forEach(supervisor => {
+        const supervisorData = filteredData.filter(p => p.supervisor === supervisor);
+        if (supervisorData.length > 0) {
+            supervisorStats[supervisor] = {
+                average: Math.round(supervisorData.reduce((sum, p) => sum + p.completion, 0) / supervisorData.length),
+                count: supervisorData.length,
+                completed: supervisorData.filter(p => p.status === 'Completed').length
+            };
+        }
+    });
+
+    const labels = Object.keys(supervisorStats).map(name => name.replace('Dr. ', ''));
+    const averages = Object.keys(supervisorStats).map(supervisor => supervisorStats[supervisor].average);
+    const counts = Object.keys(supervisorStats).map(supervisor => supervisorStats[supervisor].count);
+
+    if (supervisorsChart) {
+        supervisorsChart.destroy();
+    }
+
+    supervisorsChart = new Chart(ctx, {
+        type: 'bar', // horizontalBar is deprecated in Chart.js 3+
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Completion Rate (%)',
+                data: averages,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    labels: {
+                        font: { family: 'Segoe UI' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const supervisor = Object.keys(supervisorStats)[context.dataIndex];
+                            return `Number of Pharmacists: ${supervisorStats[supervisor].count}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Districts comparison chart
+function createDistrictsChart() {
+    const ctx = document.getElementById('districtsChart').getContext('2d');
+    
+    const districtStats = {};
+    const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district))];
+    
+    districtsToShow.forEach(district => {
+        const districtData = filteredData.filter(p => p.district === district);
+        if (districtData.length > 0) {
+            districtStats[district] = {
+                average: Math.round(districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length),
+                count: districtData.length,
+                completed: districtData.filter(p => p.status === 'Completed').length
+            };
+        }
+    });
+
+    const labels = Object.keys(districtStats);
+    const averages = labels.map(district => districtStats[district].average);
+
+    if (districtsChart) {
+        districtsChart.destroy();
+    }
+
+    districtsChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Completion Rate (%)',
+                data: averages,
+                backgroundColor: 'rgba(0, 102, 204, 0.2)',
+                borderColor: 'rgba(0, 102, 204, 1)',
+                pointBackgroundColor: 'rgba(0, 102, 204, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(0, 102, 204, 1)',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: { family: 'Segoe UI' }
+                    }
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Top Pharmacists chart
+function createPharmacistsChart() {
+    const ctx = document.getElementById('pharmacistsChart').getContext('2d');
+    
+    // Sort pharmacists by completion rate and take top 10
+    const sortedPharmacists = filteredData
+        .sort((a, b) => b.completion - a.completion)
+        .slice(0, 10);
+
+    const labels = sortedPharmacists.map(p => p.name.split(' ').slice(0, 2).join(' '));
+    const completions = sortedPharmacists.map(p => p.completion);
+
+    // Gradient colors from green to red
+    const colors = sortedPharmacists.map((p, index) => {
+        const ratio = (sortedPharmacists.length - index) / sortedPharmacists.length;
+        const red = Math.round(255 * (1 - ratio));
+        const green = Math.round(255 * ratio);
+        return `rgba(${red}, ${green}, 0, 0.8)`;
+    });
+
+    if (pharmacistsChart) {
+        pharmacistsChart.destroy();
+    }
+
+    pharmacistsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Completion Rate (%)',
+                data: completions,
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: colors.map(color => color.replace('0.8', '1'))
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return sortedPharmacists[context[0].dataIndex].name;
+                        },
+                        afterLabel: function(context) {
+                            const pharmacist = sortedPharmacists[context.dataIndex];
+                            return [
+                                `City: ${pharmacist.city}`,
+                                `Supervisor: ${pharmacist.supervisor}`,
+                                `Status: ${pharmacist.status}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxRotation: 45, minRotation: 45 }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+       // Status Pie Chart
+function createStatusPieChart() {
+    const ctx = document.getElementById('statusPieChart').getContext('2d');
+    
+    const completed = filteredData.filter(p => p.status === 'Completed').length;
+    const progress = filteredData.filter(p => p.status === 'In Progress').length;
+    const pending = filteredData.filter(p => p.status === 'Pending').length;
+
+    if (statusPieChart) {
+        statusPieChart.destroy();
+    }
+
+    statusPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Pending'],
+            datasets: [{
+                data: [completed, progress, pending],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(220, 53, 69, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { 
+                            family: 'Segoe UI',
+                            size: 14
+                        },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+                            const percentage = Math.round((context.parsed / total) * 100);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Main Performance Chart
+function createChart() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    const dates = [];
+    const completionRates = [];
+    
+    for (let i = 30; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date.toLocaleDateString('en-US'));
+        
+        const dayData = filteredData.filter(p => {
+            const pDate = new Date(p.dateCompleted);
+            return pDate.toDateString() === date.toDateString();
+        });
+        
+        const avgCompletion = dayData.length > 0 
+            ? dayData.reduce((sum, p) => sum + p.completion, 0) / dayData.length
+            : Math.random() * 30 + 50;
+            
+        completionRates.push(Math.round(avgCompletion));
+    }
+
+    performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Daily Completion Rate (%)',
+                data: completionRates,
+                borderColor: '#0066cc',
+                backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { font: { family: 'Segoe UI' } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) { return value + '%'; }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update all charts
+function updateAllCharts() {
+    updateChart();
+    updateComparisonCharts();
+}
+
+// Update comparison charts
+function updateComparisonCharts() {
+    createCitiesChart();
+    createSupervisorsChart();
+    createDistrictsChart();
+    createPharmacistsChart();
+    createStatusPieChart();
+}
+
+// Update main performance chart
+function updateChart() {
+    if (performanceChart) {
+        const dates = [];
+        const completionRates = [];
+        
+        for (let i = 30; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            dates.push(date.toLocaleDateString('en-US'));
+            
+            const dayData = filteredData.filter(p => {
+                const pDate = new Date(p.dateCompleted);
+                return Math.abs(pDate - date) < 24 * 60 * 60 * 1000;
+            });
+            
+            const avgCompletion = dayData.length > 0 
+                ? dayData.reduce((sum, p) => sum + p.completion, 0) / dayData.length
+                : Math.random() * 20 + 60;
+                
+            completionRates.push(Math.round(avgCompletion));
+        }
+
+        performanceChart.data.labels = dates;
+        performanceChart.data.datasets[0].data = completionRates;
+        performanceChart.update();
+    }
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('pharmacistSearch').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    
+    selectedCities.length = 0;
+    selectedSupervisors.length = 0;
+    selectedDistricts.length = 0;
+    
+    updateSelectedItems(document.getElementById('selectedCities'), selectedCities);
+    updateSelectedItems(document.getElementById('selectedSupervisors'), selectedSupervisors);
+    updateSelectedItems(document.getElementById('selectedDistricts'), selectedDistricts);
+    
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    
+    applyFilters();
+}
+
+// Initialize filters
+function initializeFilters() {
+    const cities = [...new Set(pharmacistsData.map(p => p.city))];
+    const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor))];
+    const districts = [...new Set(pharmacistsData.map(p => p.district))];
+    
+    setupMultiSelect('cityMultiSelect', 'cityDropdown', 'selectedCities', cities, selectedCities);
+    setupMultiSelect('supervisorMultiSelect', 'supervisorDropdown', 'selectedSupervisors', supervisors, selectedSupervisors);
+    setupMultiSelect('districtMultiSelect', 'districtDropdown', 'selectedDistricts', districts, selectedDistricts);
+}
+
+// Simulate data loading
+function loadData() {
+    setTimeout(() => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('dataTable').style.display = 'table';
+        
+        displayData(pharmacistsData);
+        updateStats();
+        initializeFilters();
+        createChart();
+        updateComparisonCharts();
+    }, 2000);
+}
+
+// Event listeners
+document.getElementById('pharmacistSearch').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('dateFrom').addEventListener('change', applyFilters);
+document.getElementById('dateTo').addEventListener('change', applyFilters);
+document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+
+// Start the app
+loadData();
