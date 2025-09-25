@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #0066cc 0%, #004080 100%);
             min-height: 100vh;
             padding: 20px;
@@ -33,7 +33,6 @@
             color: white;
             padding: 30px;
             text-align: center;
-            position: relative;
         }
 
         .header h1 {
@@ -62,7 +61,6 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: all 0.3s ease;
-            cursor: pointer;
             border-left: 5px solid transparent;
         }
 
@@ -152,14 +150,22 @@
             border-radius: 10px;
             background: white;
             cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            user-select: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
         }
 
         .multi-select-trigger:hover {
             border-color: #0066cc;
+        }
+
+        .multi-select-trigger::after {
+            content: "▼";
+            font-size: 12px;
+            color: #666;
         }
 
         .multi-select-dropdown {
@@ -168,9 +174,8 @@
             left: 0;
             right: 0;
             background: white;
-            border: 2px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
+            border: 2px solid #0066cc;
+            border-radius: 10px;
             max-height: 200px;
             overflow-y: auto;
             z-index: 1000;
@@ -178,17 +183,18 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .multi-select-dropdown.show {
-            display: block;
-        }
-
         .multi-select-option {
             padding: 10px 15px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .multi-select-option:last-child {
+            border-bottom: none;
         }
 
         .multi-select-option:hover {
@@ -200,11 +206,18 @@
             cursor: pointer;
         }
 
+        .multi-select-option label {
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+
         .selected-items {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 8px;
+            min-height: 20px;
         }
 
         .selected-item {
@@ -221,6 +234,39 @@
         .remove-item {
             cursor: pointer;
             font-weight: bold;
+            font-size: 14px;
+        }
+
+        .remove-item:hover {
+            color: #ff6b6b;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
         }
 
         .chart-container {
@@ -242,7 +288,7 @@
         }
 
         .chart-title {
-            font-size: 1.5em;
+            font-size: 1.4em;
             font-weight: 600;
             margin-bottom: 20px;
             color: #333;
@@ -254,10 +300,16 @@
             background: white;
         }
 
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -286,7 +338,7 @@
         .status-badge {
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
         }
@@ -304,6 +356,16 @@
         .status-pending {
             background-color: #f8d7da;
             color: #721c24;
+        }
+
+        .course-mandatory {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .course-optional {
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
 
         .progress-bar {
@@ -328,33 +390,6 @@
             font-size: 18px;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: #0066cc;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0052a3;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
         @media (max-width: 768px) {
             .filters-grid {
                 grid-template-columns: 1fr;
@@ -372,29 +407,34 @@
             .charts-grid {
                 grid-template-columns: 1fr;
             }
+
+            .table-header {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>United Pharmaceutical</h1>
-            <p>Learning Management System - Course Completion Rates</p>
+            <h1>🏥 United Pharmacies</h1>
+            <p>Learning Management System Dashboard - Course Completion Analytics</p>
         </div>
 
         <div class="stats-container">
             <div class="stat-card completed">
-                <span class="icon">✓</span>
+                <span class="icon">✅</span>
                 <div class="number" id="completedCount">0</div>
                 <div class="label">Completed</div>
             </div>
             <div class="stat-card progress">
-                <span class="icon">⟳</span>
+                <span class="icon">⏳</span>
                 <div class="number" id="progressCount">0</div>
                 <div class="label">In Progress</div>
             </div>
             <div class="stat-card pending">
-                <span class="icon">⏸</span>
+                <span class="icon">⏸️</span>
                 <div class="number" id="pendingCount">0</div>
                 <div class="label">Pending</div>
             </div>
@@ -406,20 +446,29 @@
         </div>
 
         <div class="filters-section">
-            <h3 style="margin-bottom: 20px; color: #333;">Filters & Search</h3>
+            <h3 style="margin-bottom: 20px; color: #333;">🔍 Filters & Search</h3>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label class="filter-label">Search Pharmacists</label>
-                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Search by pharmacist name...">
+                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Search by name...">
                 </div>
                 
                 <div class="filter-group">
-                    <label class="filter-label">Filter by Status</label>
+                    <label class="filter-label">Status</label>
                     <select class="filter-select" id="statusFilter">
                         <option value="">All Statuses</option>
                         <option value="Completed">Completed</option>
                         <option value="In Progress">In Progress</option>
                         <option value="Pending">Pending</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Course Type</label>
+                    <select class="filter-select" id="courseTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="Mandatory">Mandatory</option>
+                        <option value="Optional">Optional</option>
                     </select>
                 </div>
 
@@ -434,137 +483,111 @@
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">Cities (Multi-Select)</label>
+                    <label class="filter-label">Cities</label>
                     <div class="multi-select" id="cityMultiSelect">
-                        <div class="multi-select-trigger" id="cityTrigger">
-                            <span>Select Cities...</span>
-                            <span>▼</span>
-                        </div>
+                        <div class="multi-select-trigger">Select Cities...</div>
                         <div class="multi-select-dropdown" id="cityDropdown"></div>
                         <div class="selected-items" id="selectedCities"></div>
                     </div>
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">Supervisors (Multi-Select)</label>
+                    <label class="filter-label">Supervisors</label>
                     <div class="multi-select" id="supervisorMultiSelect">
-                        <div class="multi-select-trigger" id="supervisorTrigger">
-                            <span>Select Supervisors...</span>
-                            <span>▼</span>
-                        </div>
+                        <div class="multi-select-trigger">Select Supervisors...</div>
                         <div class="multi-select-dropdown" id="supervisorDropdown"></div>
                         <div class="selected-items" id="selectedSupervisors"></div>
                     </div>
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">Districts (Multi-Select)</label>
+                    <label class="filter-label">Districts</label>
                     <div class="multi-select" id="districtMultiSelect">
-                        <div class="multi-select-trigger" id="districtTrigger">
-                            <span>Select Districts...</span>
-                            <span>▼</span>
-                        </div>
+                        <div class="multi-select-trigger">Select Districts...</div>
                         <div class="multi-select-dropdown" id="districtDropdown"></div>
                         <div class="selected-items" id="selectedDistricts"></div>
                     </div>
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">Courses (Multi-Select)</label>
+                    <label class="filter-label">Courses</label>
                     <div class="multi-select" id="courseMultiSelect">
-                        <div class="multi-select-trigger" id="courseTrigger">
-                            <span>Select Courses...</span>
-                            <span>▼</span>
-                        </div>
+                        <div class="multi-select-trigger">Select Courses...</div>
                         <div class="multi-select-dropdown" id="courseDropdown"></div>
                         <div class="selected-items" id="selectedCourses"></div>
                     </div>
                 </div>
 
-                <div class="filter-group">
-                    <label class="filter-label">Course Type</label>
-                    <select class="filter-select" id="courseTypeFilter">
-                        <option value="">All Types</option>
-                        <option value="Mandatory">Mandatory</option>
-                        <option value="Optional">Optional</option>
-                    </select>
-                </div>
-
                 <div class="filter-group" style="align-self: end;">
-                    <button class="btn btn-secondary" id="clearFilters">Clear Filters</button>
+                    <button class="btn btn-secondary" id="clearFilters">Clear All Filters</button>
                 </div>
             </div>
         </div>
 
         <div class="chart-container">
-            <div class="chart-wrapper">
-                <h3 class="chart-title">Performance Trend Over Time</h3>
-                <canvas id="performanceChart" width="400" height="200"></canvas>
-            </div>
-
             <div class="charts-grid">
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Cities Comparison - Completion Rate</h3>
-                    <canvas id="citiesChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">🏙️ Cities Performance</h3>
+                    <canvas id="citiesChart"></canvas>
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Supervisors Comparison - Completion Rate</h3>
-                    <canvas id="supervisorsChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">👥 Supervisors Performance</h3>
+                    <canvas id="supervisorsChart"></canvas>
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Districts Comparison - Completion Rate</h3>
-                    <canvas id="districtsChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">📚 Courses Performance</h3>
+                    <canvas id="coursesChart"></canvas>
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Courses Comparison - Completion Rate</h3>
-                    <canvas id="coursesChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">📖 Mandatory vs Optional</h3>
+                    <canvas id="courseTypesChart"></canvas>
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Course Types - Performance</h3>
-                    <canvas id="courseTypesChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">📍 Districts Performance</h3>
+                    <canvas id="districtsChart"></canvas>
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">Top Pharmacists - Completion Rate</h3>
-                    <canvas id="pharmacistsChart" width="400" height="300"></canvas>
+                    <h3 class="chart-title">📈 Performance Trend</h3>
+                    <canvas id="performanceChart"></canvas>
                 </div>
             </div>
 
-            <div class="chart-wrapper" style="margin-top: 30px;">
-                <h3 class="chart-title">Status Distribution</h3>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">📊 Status Distribution</h3>
                 <div style="max-width: 400px; margin: 0 auto;">
-                    <canvas id="statusPieChart" width="400" height="400"></canvas>
+                    <canvas id="statusChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="table-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: #333; margin: 0;">Pharmacists Data</h3>
+            <div class="table-header">
+                <h3 style="color: #333; margin: 0;">📋 Pharmacists Data</h3>
                 <button class="btn btn-primary" id="toggleTableBtn">Hide Table</button>
             </div>
 
             <div id="loadingMessage" class="loading">
-                Loading data...
+                Loading data... ⏳
             </div>
 
             <div id="tableSection">
                 <table id="dataTable" style="display: none;">
                     <thead>
                         <tr>
-                            <th>Pharmacist Name</th>
+                            <th>Pharmacist</th>
                             <th>City</th>
                             <th>District</th>
                             <th>Supervisor</th>
                             <th>Course</th>
-                            <th>Course Type</th>
-                            <th>Completion Rate</th>
+                            <th>Type</th>
+                            <th>Completion</th>
                             <th>Status</th>
-                            <th>Date Completed</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -575,7 +598,7 @@
     </div>
 
     <script>
-        // Pharmacists data in Saudi Arabia
+        // Sample data - Replace with real API data
         const pharmacistsData = [
             {
                 name: "Ahmed Mohammed Al-Otaibi",
@@ -711,21 +734,268 @@
             }
         ];
 
+        // Global variables
         let filteredData = [...pharmacistsData];
         let selectedCities = [];
         let selectedSupervisors = [];
         let selectedDistricts = [];
         let selectedCourses = [];
-        let charts = {};
+        
+        let charts = {
+            cities: null,
+            supervisors: null,
+            courses: null,
+            courseTypes: null,
+            districts: null,
+            performance: null,
+            status: null
+        };
 
-        // Update statistics
+        // Initialize dashboard
+        function initDashboard() {
+            setupMultiSelectFilters();
+            setupEventListeners();
+            
+            setTimeout(() => {
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('dataTable').style.display = 'table';
+                updateDashboard();
+            }, 1500);
+        }
+
+        // Setup multi-select filters
+        function setupMultiSelectFilters() {
+            const cities = [...new Set(pharmacistsData.map(p => p.city))];
+            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor))];
+            const districts = [...new Set(pharmacistsData.map(p => p.district))];
+            const courses = [...new Set(pharmacistsData.map(p => p.course))];
+
+            setupMultiSelect('cityMultiSelect', cities, selectedCities);
+            setupMultiSelect('supervisorMultiSelect', supervisors, selectedSupervisors);
+            setupMultiSelect('districtMultiSelect', districts, selectedDistricts);
+            setupMultiSelect('courseMultiSelect', courses, selectedCourses);
+        }
+
+        // Setup individual multi-select
+        function setupMultiSelect(containerId, options, selectedArray) {
+            const container = document.getElementById(containerId);
+            const trigger = container.querySelector('.multi-select-trigger');
+            const dropdown = container.querySelector('.multi-select-dropdown');
+            const selectedContainer = container.querySelector('.selected-items');
+
+            // Create options
+            dropdown.innerHTML = '';
+            options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'multi-select-option';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `${containerId}_${index}`;
+                checkbox.value = option;
+
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = option;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                dropdown.appendChild(div);
+
+                // Add event listener
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        if (!selectedArray.includes(option)) {
+                            selectedArray.push(option);
+                        }
+                    } else {
+                        const index = selectedArray.indexOf(option);
+                        if (index > -1) {
+                            selectedArray.splice(index, 1);
+                        }
+                    }
+                    updateSelectedItems(selectedContainer, selectedArray, containerId);
+                    applyFilters();
+                });
+            });
+
+            // Toggle dropdown
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isVisible = dropdown.style.display === 'block';
+                
+                // Close all dropdowns
+                document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+                    d.style.display = 'none';
+                });
+                
+                // Toggle current dropdown
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Prevent closing when clicking inside dropdown
+            dropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        // Update selected items display
+        function updateSelectedItems(container, selectedArray, containerId) {
+            container.innerHTML = '';
+            
+            selectedArray.forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'selected-item';
+                span.innerHTML = `${item} <span class="remove-item" data-value="${item}">×</span>`;
+                
+                const removeBtn = span.querySelector('.remove-item');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeSelectedItem(item, selectedArray, containerId);
+                });
+                
+                container.appendChild(span);
+            });
+
+            // Update trigger text
+            const trigger = container.parentElement.querySelector('.multi-select-trigger');
+            if (selectedArray.length === 0) {
+                const type = containerId.replace('MultiSelect', '');
+                trigger.textContent = `Select ${type.charAt(0).toUpperCase() + type.slice(1)}...`;
+            } else {
+                trigger.textContent = `${selectedArray.length} selected`;
+            }
+        }
+
+        // Remove selected item
+        function removeSelectedItem(value, selectedArray, containerId) {
+            const index = selectedArray.indexOf(value);
+            if (index > -1) {
+                selectedArray.splice(index, 1);
+                
+                // Uncheck corresponding checkbox
+                const checkbox = document.querySelector(`#${containerId} input[value="${value}"]`);
+                if (checkbox) checkbox.checked = false;
+                
+                const container = document.querySelector(`#${containerId} .selected-items`);
+                updateSelectedItems(container, selectedArray, containerId);
+                applyFilters();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('pharmacistSearch').addEventListener('input', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('courseTypeFilter').addEventListener('change', applyFilters);
+            document.getElementById('dateFrom').addEventListener('change', applyFilters);
+            document.getElementById('dateTo').addEventListener('change', applyFilters);
+            document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+            document.getElementById('toggleTableBtn').addEventListener('click', toggleTable);
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('pharmacistSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const courseTypeFilter = document.getElementById('courseTypeFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            filteredData = pharmacistsData.filter(pharmacist => {
+                const matchesSearch = pharmacist.name.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || pharmacist.status === statusFilter;
+                const matchesCourseType = !courseTypeFilter || pharmacist.courseType === courseTypeFilter;
+                const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
+                const matchesSupervisor = selectedSupervisors.length === 0 || selectedSupervisors.includes(pharmacist.supervisor);
+                const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(pharmacist.district);
+                const matchesCourse = selectedCourses.length === 0 || selectedCourses.includes(pharmacist.course);
+                
+                let matchesDate = true;
+                if (dateFrom || dateTo) {
+                    const pharmacistDate = new Date(pharmacist.dateCompleted);
+                    if (dateFrom && pharmacistDate < new Date(dateFrom)) matchesDate = false;
+                    if (dateTo && pharmacistDate > new Date(dateTo)) matchesDate = false;
+                }
+
+                return matchesSearch && matchesStatus && matchesCourseType && 
+                       matchesCity && matchesSupervisor && matchesDistrict && 
+                       matchesCourse && matchesDate;
+            });
+
+            updateDashboard();
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('pharmacistSearch').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('courseTypeFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            
+            selectedCities.length = 0;
+            selectedSupervisors.length = 0;
+            selectedDistricts.length = 0;
+            selectedCourses.length = 0;
+            
+            // Reset all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Reset selected items displays
+            document.querySelectorAll('.selected-items').forEach(container => {
+                container.innerHTML = '';
+            });
+            
+            // Reset trigger texts
+            document.getElementById('cityMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Cities...';
+            document.getElementById('supervisorMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Supervisors...';
+            document.getElementById('districtMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Districts...';
+            document.getElementById('courseMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Courses...';
+            
+            filteredData = [...pharmacistsData];
+            updateDashboard();
+        }
+
+        // Toggle table visibility
+        function toggleTable() {
+            const tableSection = document.getElementById('tableSection');
+            const toggleBtn = document.getElementById('toggleTableBtn');
+            
+            if (tableSection.style.display === 'none') {
+                tableSection.style.display = 'block';
+                toggleBtn.textContent = 'Hide Table';
+                toggleBtn.className = 'btn btn-primary';
+            } else {
+                tableSection.style.display = 'none';
+                toggleBtn.textContent = 'Show Table';
+                toggleBtn.className = 'btn btn-secondary';
+            }
+        }
+
+        // Update entire dashboard
+        function updateDashboard() {
+            updateStats();
+            updateTable();
+            updateCharts();
+        }
+
+        // Update statistics cards
         function updateStats() {
             const completed = filteredData.filter(p => p.status === 'Completed').length;
             const progress = filteredData.filter(p => p.status === 'In Progress').length;
             const pending = filteredData.filter(p => p.status === 'Pending').length;
-            const averageCompletion = Math.round(
-                filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length
-            ) || 0;
+            const averageCompletion = filteredData.length > 0 ? 
+                Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length) : 0;
             
             animateCounter('completedCount', completed);
             animateCounter('progressCount', progress);
@@ -733,10 +1003,10 @@
             document.getElementById('averageRate').textContent = averageCompletion + '%';
         }
 
-        // Animate numbers
+        // Animate counter
         function animateCounter(elementId, targetValue) {
             const element = document.getElementById(elementId);
-            const startValue = parseInt(element.textContent);
+            const startValue = parseInt(element.textContent) || 0;
             const increment = targetValue > startValue ? 1 : -1;
             let currentValue = startValue;
 
@@ -750,14 +1020,13 @@
             }, 50);
         }
 
-        // Display data in table
-        function displayData(data) {
+        // Update table
+        function updateTable() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
 
-            data.forEach(pharmacist => {
-                const row = tableBody.insertRow();
-                
+            filteredData.forEach(pharmacist => {
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${pharmacist.name}</strong></td>
                     <td>${pharmacist.city}</td>
@@ -765,7 +1034,7 @@
                     <td>${pharmacist.supervisor}</td>
                     <td><strong>${pharmacist.course}</strong></td>
                     <td>
-                        <span class="status-badge ${pharmacist.courseType === 'Mandatory' ? 'status-pending' : 'status-progress'}">
+                        <span class="status-badge ${pharmacist.courseType === 'Mandatory' ? 'course-mandatory' : 'course-optional'}">
                             ${pharmacist.courseType}
                         </span>
                     </td>
@@ -782,219 +1051,29 @@
                     </td>
                     <td>${pharmacist.dateCompleted}</td>
                 `;
+                tableBody.appendChild(row);
             });
         }
 
-        // Setup Multi-Select
-// Setup Multi-Select (fixed with working checkboxes)
-function setupMultiSelect(containerId, dropdownId, selectedId, options, selectedArray, triggerId) {
-    const container = document.getElementById(containerId);
-    const dropdown = document.getElementById(dropdownId);
-    const selectedContainer = document.getElementById(selectedId);
-    const trigger = document.getElementById(triggerId);
-
-    if (!container || !dropdown || !selectedContainer || !trigger) {
-        console.error('Multi-select elements not found:', containerId);
-        return;
-    }
-
-    // Create options with checkboxes
-    dropdown.innerHTML = '';
-    options.forEach(option => {
-        const div = document.createElement('div');
-        div.className = 'multi-select-option';
-        const checkboxId = `${containerId}_${option.replace(/\s+/g, '_').replace(/\./g, '_')}`;
-        div.innerHTML = `
-            <input type="checkbox" id="${checkboxId}" value="${option}">
-            <label for="${checkboxId}">${option}</label>
-        `;
-        dropdown.appendChild(div);
-
-        // Attach filtering directly on each checkbox
-        div.querySelector('input').addEventListener('change', (e) => {
-            const value = e.target.value;
-            if (e.target.checked) {
-                if (!selectedArray.includes(value)) {
-                    selectedArray.push(value);
-                }
-            } else {
-                const index = selectedArray.indexOf(value);
-                if (index > -1) {
-                    selectedArray.splice(index, 1);
-                }
-            }
-            updateSelectedItems(selectedContainer, selectedArray, containerId);
-            applyFilters();
-        });
-    });
-
-    // Open/close dropdown
-    trigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Close all other dropdowns
-        document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
-            if (dd !== dropdown) {
-                dd.classList.remove('show');
-            }
-        });
-
-        // Toggle current dropdown
-        dropdown.classList.toggle('show');
-    });
-
-    // Prevent dropdown from closing when clicking inside
-    dropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!container.contains(e.target)) {
-            dropdown.classList.remove('show');
-        }
-    });
-}
-        // Update selected items display
-        function updateSelectedItems(container, selectedArray, containerId) {
-            container.innerHTML = '';
-            selectedArray.forEach(item => {
-                const span = document.createElement('span');
-                span.className = 'selected-item';
-                span.innerHTML = `
-                    ${item}
-                    <span class="remove-item" data-value="${item}" data-container="${containerId}">×</span>
-                `;
-                container.appendChild(span);
-            });
-
-            // Handle item removal
-            container.querySelectorAll('.remove-item').forEach(removeBtn => {
-                removeBtn.addEventListener('click', (e) => {
-                    const value = e.target.getAttribute('data-value');
-                    const containerId = e.target.getAttribute('data-container');
-                    const index = selectedArray.indexOf(value);
-                    
-                    if (index > -1) {
-                        selectedArray.splice(index, 1);
-                        updateSelectedItems(container, selectedArray, containerId);
-                        
-                        // Uncheck the checkbox
-                        const checkboxId = `${containerId}_${value.replace(/\s+/g, '_').replace(/\./g, '_')}`;
-                        const checkbox = document.getElementById(checkboxId);
-                        if (checkbox) checkbox.checked = false;
-                        
-                        applyFilters();
-                    }
-                });
-            });
+        // Update all charts
+        function updateCharts() {
+            createCitiesChart();
+            createSupervisorsChart();
+            createCoursesChart();
+            createCourseTypesChart();
+            createDistrictsChart();
+            createPerformanceChart();
+            createStatusChart();
         }
 
-        // Apply filters
-        function applyFilters() {
-            const searchTerm = document.getElementById('pharmacistSearch').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const courseTypeFilter = document.getElementById('courseTypeFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-
-            filteredData = pharmacistsData.filter(pharmacist => {
-                const matchesSearch = pharmacist.name.toLowerCase().includes(searchTerm);
-                const matchesStatus = statusFilter === '' || pharmacist.status === statusFilter;
-                const matchesCourseType = courseTypeFilter === '' || pharmacist.courseType === courseTypeFilter;
-                const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
-                const matchesSupervisor = selectedSupervisors.length === 0 || selectedSupervisors.includes(pharmacist.supervisor);
-                const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(pharmacist.district);
-                const matchesCourse = selectedCourses.length === 0 || selectedCourses.includes(pharmacist.course);
-                
-                let matchesDate = true;
-                if (dateFrom || dateTo) {
-                    const pharmacistDate = new Date(pharmacist.dateCompleted);
-                    if (dateFrom && pharmacistDate < new Date(dateFrom)) matchesDate = false;
-                    if (dateTo && pharmacistDate > new Date(dateTo)) matchesDate = false;
-                }
-
-                return matchesSearch && matchesStatus && matchesCourseType && matchesCity && 
-                       matchesSupervisor && matchesDistrict && matchesCourse && matchesDate;
-            });
-
-            displayData(filteredData);
-            updateStats();
-            updateAllCharts();
-        }
-
-        // Create performance trend chart
-        function createPerformanceChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            const dates = [];
-            const completionRates = [];
-            
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                dates.push(date.toLocaleDateString('en-US'));
-                
-                const dayData = filteredData.filter(p => {
-                    const pDate = new Date(p.dateCompleted);
-                    return Math.abs(pDate - date) < 24 * 60 * 60 * 1000;
-                });
-                
-                const avgCompletion = dayData.length > 0 
-                    ? dayData.reduce((sum, p) => sum + p.completion, 0) / dayData.length
-                    : Math.random() * 20 + 60;
-                    
-                completionRates.push(Math.round(avgCompletion));
-            }
-
-            if (charts.performanceChart) {
-                charts.performanceChart.destroy();
-            }
-
-            charts.performanceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Daily Completion Rate (%)',
-                        data: completionRates,
-                        borderColor: '#0066cc',
-                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: {
-                                    family: 'Segoe UI'
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create cities comparison chart
+        // Create cities chart
         function createCitiesChart() {
             const ctx = document.getElementById('citiesChart').getContext('2d');
             
+            if (charts.cities) {
+                charts.cities.destroy();
+            }
+
             const cityStats = {};
             const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city))];
             
@@ -1003,8 +1082,7 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                 if (cityData.length > 0) {
                     cityStats[city] = {
                         average: Math.round(cityData.reduce((sum, p) => sum + p.completion, 0) / cityData.length),
-                        count: cityData.length,
-                        completed: cityData.filter(p => p.status === 'Completed').length
+                        count: cityData.length
                     };
                 }
             });
@@ -1012,11 +1090,7 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             const labels = Object.keys(cityStats);
             const averages = labels.map(city => cityStats[city].average);
 
-            if (charts.citiesChart) {
-                charts.citiesChart.destroy();
-            }
-
-            charts.citiesChart = new Chart(ctx, {
+            charts.cities = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -1030,24 +1104,9 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            labels: {
-                                font: { family: 'Segoe UI' }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    const city = context.label;
-                                    const stats = cityStats[city];
-                                    return [
-                                        `Total Pharmacists: ${stats.count}`,
-                                        `Completed: ${stats.completed}`
-                                    ];
-                                }
-                            }
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         y: {
@@ -1063,10 +1122,14 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             });
         }
 
-        // Create supervisors comparison chart
+        // Create supervisors chart
         function createSupervisorsChart() {
             const ctx = document.getElementById('supervisorsChart').getContext('2d');
             
+            if (charts.supervisors) {
+                charts.supervisors.destroy();
+            }
+
             const supervisorStats = {};
             const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor))];
             
@@ -1075,20 +1138,15 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                 if (supervisorData.length > 0) {
                     supervisorStats[supervisor] = {
                         average: Math.round(supervisorData.reduce((sum, p) => sum + p.completion, 0) / supervisorData.length),
-                        count: supervisorData.length,
-                        completed: supervisorData.filter(p => p.status === 'Completed').length
+                        count: supervisorData.length
                     };
                 }
             });
 
-            const labels = Object.keys(supervisorStats);
-            const averages = labels.map(supervisor => supervisorStats[supervisor].average);
+            const labels = Object.keys(supervisorStats).map(name => name.replace('Dr. ', ''));
+            const averages = Object.values(supervisorStats).map(stat => stat.average);
 
-            if (charts.supervisorsChart) {
-                charts.supervisorsChart.destroy();
-            }
-
-            charts.supervisorsChart = new Chart(ctx, {
+            charts.supervisors = new Chart(ctx, {
                 type: 'horizontalBar',
                 data: {
                     labels: labels,
@@ -1103,16 +1161,23 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                             'rgba(153, 102, 255, 0.8)',
                             'rgba(255, 159, 64, 0.8)'
                         ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     indexAxis: 'y',
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         x: {
@@ -1128,74 +1193,14 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             });
         }
 
-        // Create districts comparison chart
-        function createDistrictsChart() {
-            const ctx = document.getElementById('districtsChart').getContext('2d');
-            
-            const districtStats = {};
-            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district))];
-            
-            districtsToShow.forEach(district => {
-                const districtData = filteredData.filter(p => p.district === district);
-                if (districtData.length > 0) {
-                    districtStats[district] = {
-                        average: Math.round(districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length),
-                        count: districtData.length
-                    };
-                }
-            });
-
-            const labels = Object.keys(districtStats);
-            const averages = labels.map(district => districtStats[district].average);
-
-            if (charts.districtsChart) {
-                charts.districtsChart.destroy();
-            }
-
-            charts.districtsChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Completion Rate (%)',
-                        data: averages,
-                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
-                        borderColor: 'rgba(0, 102, 204, 1)',
-                        pointBackgroundColor: 'rgba(0, 102, 204, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(0, 102, 204, 1)',
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: { family: 'Segoe UI' }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create courses comparison chart
+        // Create courses chart
         function createCoursesChart() {
             const ctx = document.getElementById('coursesChart').getContext('2d');
             
+            if (charts.courses) {
+                charts.courses.destroy();
+            }
+
             const courseStats = {};
             const coursesToShow = selectedCourses.length > 0 ? selectedCourses : [...new Set(filteredData.map(p => p.course))];
             
@@ -1204,8 +1209,7 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                 if (courseData.length > 0) {
                     courseStats[course] = {
                         average: Math.round(courseData.reduce((sum, p) => sum + p.completion, 0) / courseData.length),
-                        count: courseData.length,
-                        completed: courseData.filter(p => p.status === 'Completed').length
+                        count: courseData.length
                     };
                 }
             });
@@ -1213,43 +1217,40 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             const labels = Object.keys(courseStats);
             const averages = labels.map(course => courseStats[course].average);
 
-            if (charts.coursesChart) {
-                charts.coursesChart.destroy();
-            }
-
-            charts.coursesChart = new Chart(ctx, {
+            charts.courses = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Average Completion Rate (%)',
                         data: averages,
-                        backgroundColor: labels.map((course, index) => {
-                            const colors = [
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(255, 99, 132, 0.8)',
-                                'rgba(75, 192, 192, 0.8)',
-                                'rgba(153, 102, 255, 0.8)',
-                                'rgba(255, 159, 64, 0.8)',
-                                'rgba(255, 205, 86, 0.8)'
-                            ];
-                            return colors[index % colors.length];
-                        }),
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         x: {
                             ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
+                                maxRotation: 45
                             }
                         },
                         y: {
@@ -1269,6 +1270,10 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
         function createCourseTypesChart() {
             const ctx = document.getElementById('courseTypesChart').getContext('2d');
             
+            if (charts.courseTypes) {
+                charts.courseTypes.destroy();
+            }
+
             const mandatoryData = filteredData.filter(p => p.courseType === 'Mandatory');
             const optionalData = filteredData.filter(p => p.courseType === 'Optional');
 
@@ -1277,16 +1282,11 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             const optionalAvg = optionalData.length > 0 ? 
                 Math.round(optionalData.reduce((sum, p) => sum + p.completion, 0) / optionalData.length) : 0;
 
-            if (charts.courseTypesChart) {
-                charts.courseTypesChart.destroy();
-            }
-
-            charts.courseTypesChart = new Chart(ctx, {
+            charts.courseTypes = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Mandatory Courses', 'Optional Courses'],
                     datasets: [{
-                        label: 'Average Completion Rate',
                         data: [mandatoryAvg, optionalAvg],
                         backgroundColor: [
                             'rgba(220, 53, 69, 0.8)',
@@ -1301,6 +1301,7 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -1310,47 +1311,103 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             });
         }
 
-        // Create top pharmacists chart
-        function createPharmacistsChart() {
-            const ctx = document.getElementById('pharmacistsChart').getContext('2d');
+        // Create districts chart
+        function createDistrictsChart() {
+            const ctx = document.getElementById('districtsChart').getContext('2d');
             
-            const sortedPharmacists = filteredData
-                .sort((a, b) => b.completion - a.completion)
-                .slice(0, 10);
-
-            const labels = sortedPharmacists.map(p => p.name.split(' ').slice(0, 2).join(' '));
-            const completions = sortedPharmacists.map(p => p.completion);
-
-            if (charts.pharmacistsChart) {
-                charts.pharmacistsChart.destroy();
+            if (charts.districts) {
+                charts.districts.destroy();
             }
 
-            charts.pharmacistsChart = new Chart(ctx, {
-                type: 'bar',
+            const districtStats = {};
+            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district))];
+            
+            districtsToShow.forEach(district => {
+                const districtData = filteredData.filter(p => p.district === district);
+                if (districtData.length > 0) {
+                    districtStats[district] = Math.round(districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length);
+                }
+            });
+
+            const labels = Object.keys(districtStats);
+            const averages = Object.values(districtStats);
+
+            charts.districts = new Chart(ctx, {
+                type: 'radar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Completion Rate (%)',
-                        data: completions,
-                        backgroundColor: 'rgba(40, 167, 69, 0.8)',
-                        borderColor: 'rgba(40, 167, 69, 1)',
-                        borderWidth: 2
+                        data: averages,
+                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
+                        borderColor: 'rgba(0, 102, 204, 1)',
+                        pointBackgroundColor: 'rgba(0, 102, 204, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(0, 102, 204, 1)',
+                        borderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
                         }
+                    }
+                }
+            });
+        }
+
+        // Create performance trend chart
+        function createPerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            if (charts.performance) {
+                charts.performance.destroy();
+            }
+
+            // Generate sample trend data
+            const dates = [];
+            const completionRates = [];
+            
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                
+                // Sample data based on filtered results
+                const avgCompletion = filteredData.length > 0 
+                    ? Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length)
+                    : 0;
+                
+                // Add some variance for trend visualization
+                const variance = Math.random() * 20 - 10;
+                completionRates.push(Math.max(0, Math.min(100, avgCompletion + variance)));
+            }
+
+            charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Daily Completion Rate (%)',
+                        data: completionRates,
+                        borderColor: 'rgba(0, 102, 204, 1)',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
                     },
                     scales: {
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        },
                         y: {
                             beginAtZero: true,
                             max: 100,
@@ -1364,19 +1421,19 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
             });
         }
 
-        // Create status pie chart
-        function createStatusPieChart() {
-            const ctx = document.getElementById('statusPieChart').getContext('2d');
+        // Create status distribution chart
+        function createStatusChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
             
+            if (charts.status) {
+                charts.status.destroy();
+            }
+
             const completed = filteredData.filter(p => p.status === 'Completed').length;
             const progress = filteredData.filter(p => p.status === 'In Progress').length;
             const pending = filteredData.filter(p => p.status === 'Pending').length;
 
-            if (charts.statusPieChart) {
-                charts.statusPieChart.destroy();
-            }
-
-            charts.statusPieChart = new Chart(ctx, {
+            charts.status = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Completed', 'In Progress', 'Pending'],
@@ -1400,135 +1457,15 @@ function setupMultiSelect(containerId, dropdownId, selectedId, options, selected
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { 
-                                    family: 'Segoe UI',
-                                    size: 14
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
-                                    const percentage = Math.round((context.parsed / total) * 100);
-                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
-                                }
-                            }
+                            position: 'bottom'
                         }
                     }
                 }
             });
         }
 
-        // Update all charts
-        function updateAllCharts() {
-            createPerformanceChart();
-            createCitiesChart();
-            createSupervisorsChart();
-            createDistrictsChart();
-            createCoursesChart();
-            createCourseTypesChart();
-            createPharmacistsChart();
-            createStatusPieChart();
-        }
-
-        // Clear all filters
-        function clearAllFilters() {
-            // Clear text inputs
-            document.getElementById('pharmacistSearch').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-            
-            // Clear select dropdowns
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('courseTypeFilter').value = '';
-            
-            // Clear multi-select arrays
-            selectedCities.length = 0;
-            selectedSupervisors.length = 0;
-            selectedDistricts.length = 0;
-            selectedCourses.length = 0;
-            
-            // Clear selected items display
-            const selectedCitiesContainer = document.getElementById('selectedCities');
-            const selectedSupervisorsContainer = document.getElementById('selectedSupervisors');
-            const selectedDistrictsContainer = document.getElementById('selectedDistricts');
-            const selectedCoursesContainer = document.getElementById('selectedCourses');
-            
-            if (selectedCitiesContainer) selectedCitiesContainer.innerHTML = '';
-            if (selectedSupervisorsContainer) selectedSupervisorsContainer.innerHTML = '';
-            if (selectedDistrictsContainer) selectedDistrictsContainer.innerHTML = '';
-            if (selectedCoursesContainer) selectedCoursesContainer.innerHTML = '';
-            
-            // Uncheck all checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-            });
-            
-            // Close all dropdowns
-            document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
-                dd.classList.remove('show');
-            });
-            
-            // Reapply filters (which will show all data since filters are cleared)
-            applyFilters();
-        }
-
-        // Initialize filters
-        function initializeFilters() {
-            const cities = [...new Set(pharmacistsData.map(p => p.city))];
-            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor))];
-            const districts = [...new Set(pharmacistsData.map(p => p.district))];
-            const courses = [...new Set(pharmacistsData.map(p => p.course))];
-            
-            setupMultiSelect('cityMultiSelect', 'cityDropdown', 'selectedCities', cities, selectedCities, 'cityTrigger');
-            setupMultiSelect('supervisorMultiSelect', 'supervisorDropdown', 'selectedSupervisors', supervisors, selectedSupervisors, 'supervisorTrigger');
-            setupMultiSelect('districtMultiSelect', 'districtDropdown', 'selectedDistricts', districts, selectedDistricts, 'districtTrigger');
-            setupMultiSelect('courseMultiSelect', 'courseDropdown', 'selectedCourses', courses, selectedCourses, 'courseTrigger');
-        }
-
-        // Toggle table visibility
-        function toggleTable() {
-            const tableSection = document.getElementById('tableSection');
-            const toggleBtn = document.getElementById('toggleTableBtn');
-            
-            if (tableSection.style.display === 'none') {
-                tableSection.style.display = 'block';
-                toggleBtn.textContent = 'Hide Table';
-                toggleBtn.classList.remove('btn-secondary');
-                toggleBtn.classList.add('btn-primary');
-            } else {
-                tableSection.style.display = 'none';
-                toggleBtn.textContent = 'Show Table';
-                toggleBtn.classList.remove('btn-primary');
-                toggleBtn.classList.add('btn-secondary');
-            }
-        }
-
-        // Load data simulation
-        function loadData() {
-            setTimeout(() => {
-                document.getElementById('loadingMessage').style.display = 'none';
-                document.getElementById('dataTable').style.display = 'table';
-                
-                displayData(pharmacistsData);
-                updateStats();
-                initializeFilters();
-                updateAllCharts();
-            }, 2000);
-        }
-
-        // Event listeners
-        document.getElementById('pharmacistSearch').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('courseTypeFilter').addEventListener('change', applyFilters);
-        document.getElementById('dateFrom').addEventListener('change', applyFilters);
-        document.getElementById('dateTo').addEventListener('change', applyFilters);
-        document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
-        document.getElementById('toggleTableBtn').addEventListener('click', toggleTable);
-
-        // Initialize the application
-        loadData();
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
