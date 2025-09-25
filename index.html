@@ -786,78 +786,75 @@
         }
 
         // Setup Multi-Select
-        function setupMultiSelect(containerId, dropdownId, selectedId, options, selectedArray, triggerId) {
-            const container = document.getElementById(containerId);
-            const dropdown = document.getElementById(dropdownId);
-            const selectedContainer = document.getElementById(selectedId);
-            const trigger = document.getElementById(triggerId);
+function setupMultiSelect(containerId, dropdownId, selectedId, options, selectedArray, triggerId) {
+    const container = document.getElementById(containerId);
+    const dropdown = document.getElementById(dropdownId);
+    const selectedContainer = document.getElementById(selectedId);
+    const trigger = document.getElementById(triggerId);
 
-            if (!container || !dropdown || !selectedContainer || !trigger) {
-                console.error('Multi-select elements not found:', containerId);
-                return;
+    if (!container || !dropdown || !selectedContainer || !trigger) {
+        console.error('Multi-select elements not found:', containerId);
+        return;
+    }
+
+    // Create options
+    dropdown.innerHTML = '';
+    options.forEach(option => {
+        const div = document.createElement('div');
+        div.className = 'multi-select-option';
+        const checkboxId = `${containerId}_${option.replace(/\s+/g, '_').replace(/\./g, '_')}`;
+        div.innerHTML = `
+            <input type="checkbox" id="${checkboxId}" value="${option}">
+            <label for="${checkboxId}">${option}</label>
+        `;
+        dropdown.appendChild(div);
+
+        // ✅ اربط الفلترة مباشرة بكل checkbox
+        div.querySelector('input').addEventListener('change', (e) => {
+            const value = e.target.value;
+            if (e.target.checked) {
+                if (!selectedArray.includes(value)) {
+                    selectedArray.push(value);
+                }
+            } else {
+                const index = selectedArray.indexOf(value);
+                if (index > -1) {
+                    selectedArray.splice(index, 1);
+                }
             }
+            updateSelectedItems(selectedContainer, selectedArray, containerId);
+            applyFilters();
+        });
+    });
 
-            // Create options
-            dropdown.innerHTML = '';
-            options.forEach(option => {
-                const div = document.createElement('div');
-                div.className = 'multi-select-option';
-                const checkboxId = `${containerId}_${option.replace(/\s+/g, '_').replace(/\./g, '_')}`;
-                div.innerHTML = `
-                    <input type="checkbox" id="${checkboxId}" value="${option}">
-                    <label for="${checkboxId}">${option}</label>
-                `;
-                dropdown.appendChild(div);
-            });
+    // Open/close dropdown
+    trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-            // Open/close dropdown - Fix the click event
-            trigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Close all other dropdowns first
-                document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
-                    if (dd !== dropdown) {
-                        dd.classList.remove('show');
-                    }
-                });
-                
-                // Toggle current dropdown
-                dropdown.classList.toggle('show');
-            });
+        // Close all other dropdowns first
+        document.querySelectorAll('.multi-select-dropdown').forEach(dd => {
+            if (dd !== dropdown) {
+                dd.classList.remove('show');
+            }
+        });
 
-            // Handle checkbox changes
-            dropdown.addEventListener('change', (e) => {
-                e.stopPropagation();
-                if (e.target.type === 'checkbox') {
-                    const value = e.target.value;
-                    if (e.target.checked) {
-                        if (!selectedArray.includes(value)) {
-                            selectedArray.push(value);
-                        }
-                    } else {
-                        const index = selectedArray.indexOf(value);
-                        if (index > -1) {
-                            selectedArray.splice(index, 1);
-                        }
-                    }
-                    updateSelectedItems(selectedContainer, selectedArray, containerId);
-                    applyFilters();
-                }
-            });
+        // Toggle current dropdown
+        dropdown.classList.toggle('show');
+    });
 
-            // Prevent dropdown from closing when clicking inside
-            dropdown.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
+    // Prevent dropdown from closing when clicking inside
+    dropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!container.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                }
-            });
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            dropdown.classList.remove('show');
         }
+    });
+}
 
         // Update selected items display
         function updateSelectedItems(container, selectedArray, containerId) {
@@ -1535,8 +1532,3 @@
 
         // Initialize the application
         loadData();
-// Fix: make sure multi-select filters apply correctly
-document.querySelectorAll('.multi-select-dropdown input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', applyFilters);
-});
-
