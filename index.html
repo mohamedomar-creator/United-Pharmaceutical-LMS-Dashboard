@@ -617,8 +617,8 @@
     <script>
         // Sample data - Replace with real API data
 async function loadDataFromSheet() {
-  const sheetID = "1AbCDeFGhIJKLmnopQRstUVwxyz1234567890"; // 1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ
-  const apiURL = `https://docs.google.com/spreadsheets/d/${1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ}/gviz/tq?tqx=out:json`;
+  const sheetID = "1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ"; // حط هنا ID الشيت بتاعك
+  const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
   const response = await fetch(apiURL);
   const text = await response.text();
@@ -640,14 +640,16 @@ async function loadDataFromSheet() {
     dateCompleted: row.c[6]?.v || ""
   }));
 
+  // نخزنها كـ global variable عشان بقية الدوال تستعملها
+  window.pharmacistsData = pharmacistsData;
+
   // بعدين نعرضهم في الداشبورد
   displayData(pharmacistsData);
-  updateStats(pharmacistsData);
-  updateCharts(pharmacistsData);
+  updateStats();
+  updateCharts();
 }
 
 loadDataFromSheet();
-
         // Global variables
         let filteredData = [...pharmacistsData];
         let selectedCities = [];
@@ -1383,4 +1385,5 @@ loadDataFromSheet();
     </script>
 </body>
 </html>
+
 
