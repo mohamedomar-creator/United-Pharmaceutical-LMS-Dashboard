@@ -616,40 +616,39 @@
 
     <script>
         // Sample data - Replace with real API data
-async function loadDataFromSheet() {
-  const sheetID = "1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ"; // حط هنا ID الشيت بتاعك
-  const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+<script>
+  let pharmacistsData = []; // متغير عام يقدر أي دالة تستخدمه
 
-  const response = await fetch(apiURL);
-  const text = await response.text();
+  async function loadDataFromSheet() {
+    const sheetID = "1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ"; // غيّر للـ Sheet ID بتاعك
+    const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
-  // جوجل بيرجع شوية كلام زيادة في الأول والآخر → بنقصهم
-  const json = JSON.parse(text.substr(47).slice(0, -2));
+    const response = await fetch(apiURL);
+    const text = await response.text();
 
-  // هنا البيانات بعد ما تتفك
-  const rows = json.table.rows;
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const rows = json.table.rows;
 
-  // نحولها لليست صيدلة زي القديم
-  const pharmacistsData = rows.map(row => ({
-    name: row.c[0]?.v || "",
-    city: row.c[1]?.v || "",
-    district: row.c[2]?.v || "",
-    supervisor: row.c[3]?.v || "",
-    completion: row.c[4]?.v || 0,
-    status: row.c[5]?.v || "",
-    dateCompleted: row.c[6]?.v || ""
-  }));
+    // خزّن البيانات في المتغير العام
+    pharmacistsData = rows.map(row => ({
+      name: row.c[0]?.v || "",
+      city: row.c[1]?.v || "",
+      district: row.c[2]?.v || "",
+      supervisor: row.c[3]?.v || "",
+      completion: row.c[4]?.v || 0,
+      status: row.c[5]?.v || "",
+      dateCompleted: row.c[6]?.v || ""
+    }));
 
-  // نخزنها كـ global variable عشان بقية الدوال تستعملها
-  window.pharmacistsData = pharmacistsData;
+    // استدعاء باقي الدوال بعد ما البيانات تيجي
+    displayData(pharmacistsData);
+    updateStats(pharmacistsData);
+    updateCharts(pharmacistsData);
+  }
 
-  // بعدين نعرضهم في الداشبورد
-  displayData(pharmacistsData);
-  updateStats();
-  updateCharts();
-}
-
-loadDataFromSheet();
+  // أول ما الصفحة تفتح يشغل التحميل
+  loadDataFromSheet();
+</script>
         // Global variables
         let filteredData = [...pharmacistsData];
         let selectedCities = [];
@@ -1385,5 +1384,6 @@ loadDataFromSheet();
     </script>
 </body>
 </html>
+
 
 
