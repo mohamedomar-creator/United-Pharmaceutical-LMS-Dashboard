@@ -616,140 +616,37 @@
 
     <script>
         // Sample data - Replace with real API data
-        const pharmacistsData = [
-            {
-                name: "Ahmed Mohammed Al-Otaibi",
-                city: "Riyadh",
-                district: "King Fahd District",
-                supervisor: "Dr. Sarah Abdullah",
-                course: "Clinical Pharmacy Basics",
-                courseType: "Mandatory",
-                completion: 95,
-                status: "Completed",
-                dateCompleted: "2024-09-15"
-            },
-            {
-                name: "Fatima Ali Al-Qahtani",
-                city: "Jeddah",
-                district: "Al-Balad",
-                supervisor: "Dr. Mohammed Hassan",
-                course: "Drug Interactions",
-                courseType: "Optional",
-                completion: 78,
-                status: "In Progress",
-                dateCompleted: "2024-09-20"
-            },
-            {
-                name: "Mohammed Abdullah Al-Shammari",
-                city: "Dammam",
-                district: "Al-Khobar",
-                supervisor: "Dr. Nadia Mohammed",
-                course: "Patient Safety",
-                courseType: "Mandatory",
-                completion: 45,
-                status: "Pending",
-                dateCompleted: "2024-09-18"
-            },
-            {
-                name: "Nour Al-Din Ahmed Al-Ghamdi",
-                city: "Riyadh",
-                district: "Olaya",
-                supervisor: "Dr. Sarah Abdullah",
-                course: "Clinical Pharmacy Basics",
-                courseType: "Mandatory",
-                completion: 100,
-                status: "Completed",
-                dateCompleted: "2024-09-12"
-            },
-            {
-                name: "Layla Hassan Al-Malki",
-                city: "Mecca",
-                district: "Al-Aziziyah",
-                supervisor: "Dr. Ahmed Salem",
-                course: "Pharmaceutical Care",
-                courseType: "Optional",
-                completion: 62,
-                status: "In Progress",
-                dateCompleted: "2024-09-22"
-            },
-            {
-                name: "Omar Saad Al-Harbi",
-                city: "Taif",
-                district: "Shahar",
-                supervisor: "Dr. Nadia Mohammed",
-                course: "Drug Interactions",
-                courseType: "Optional",
-                completion: 30,
-                status: "Pending",
-                dateCompleted: "2024-09-19"
-            },
-            {
-                name: "Khalid Fahd Al-Saud",
-                city: "Jeddah",
-                district: "Al-Rawdah",
-                supervisor: "Dr. Mohammed Hassan",
-                course: "Patient Safety",
-                courseType: "Mandatory",
-                completion: 88,
-                status: "Completed",
-                dateCompleted: "2024-09-14"
-            },
-            {
-                name: "Abeer Salman Al-Dosari",
-                city: "Al-Kharj",
-                district: "City Center",
-                supervisor: "Dr. Sarah Abdullah",
-                course: "Pharmaceutical Care",
-                courseType: "Optional",
-                completion: 72,
-                status: "In Progress",
-                dateCompleted: "2024-09-21"
-            },
-            {
-                name: "Youssef Ibrahim Al-Nuaimi",
-                city: "Abha",
-                district: "Al-Manasek",
-                supervisor: "Dr. Khalid Omar",
-                course: "Clinical Pharmacy Basics",
-                courseType: "Mandatory",
-                completion: 91,
-                status: "Completed",
-                dateCompleted: "2024-09-16"
-            },
-            {
-                name: "Rana Meshal Al-Anzi",
-                city: "Tabuk",
-                district: "Al-Rawdah",
-                supervisor: "Dr. Fahd Rashid",
-                course: "Advanced Therapeutics",
-                courseType: "Optional",
-                completion: 55,
-                status: "In Progress",
-                dateCompleted: "2024-09-23"
-            },
-            {
-                name: "Abdullah Saeed Al-Zahrani",
-                city: "Medina",
-                district: "Al-Haram",
-                supervisor: "Dr. Ahmed Salem",
-                course: "Patient Safety",
-                courseType: "Mandatory",
-                completion: 82,
-                status: "Completed",
-                dateCompleted: "2024-09-17"
-            },
-            {
-                name: "Maryam Faisal Al-Rashid",
-                city: "Khobar",
-                district: "Corniche",
-                supervisor: "Dr. Nadia Mohammed",
-                course: "Advanced Therapeutics",
-                courseType: "Optional",
-                completion: 67,
-                status: "In Progress",
-                dateCompleted: "2024-09-24"
-            }
-        ];
+async function loadDataFromSheet() {
+  const sheetID = "1AbCDeFGhIJKLmnopQRstUVwxyz1234567890"; // 1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ
+  const apiURL = `https://docs.google.com/spreadsheets/d/${1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ}/gviz/tq?tqx=out:json`;
+
+  const response = await fetch(apiURL);
+  const text = await response.text();
+
+  // جوجل بيرجع شوية كلام زيادة في الأول والآخر → بنقصهم
+  const json = JSON.parse(text.substr(47).slice(0, -2));
+
+  // هنا البيانات بعد ما تتفك
+  const rows = json.table.rows;
+
+  // نحولها لليست صيدلة زي القديم
+  const pharmacistsData = rows.map(row => ({
+    name: row.c[0]?.v || "",
+    city: row.c[1]?.v || "",
+    district: row.c[2]?.v || "",
+    supervisor: row.c[3]?.v || "",
+    completion: row.c[4]?.v || 0,
+    status: row.c[5]?.v || "",
+    dateCompleted: row.c[6]?.v || ""
+  }));
+
+  // بعدين نعرضهم في الداشبورد
+  displayData(pharmacistsData);
+  updateStats(pharmacistsData);
+  updateCharts(pharmacistsData);
+}
+
+loadDataFromSheet();
 
         // Global variables
         let filteredData = [...pharmacistsData];
@@ -1486,3 +1383,4 @@
     </script>
 </body>
 </html>
+
