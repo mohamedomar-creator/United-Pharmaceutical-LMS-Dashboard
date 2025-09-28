@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>United Pharmaceutical - LMS Dashboard</title>
+    <title>United Pharmacies - LMS Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -285,11 +285,11 @@
             background: #f8f9fa;
             border-radius: 15px;
             padding: 20px;
-            height: 400px; /* Fixed height for all charts */
+            height: 400px;
         }
 
         .chart-wrapper canvas {
-            max-height: 320px !important; /* Maximum height for canvas */
+            max-height: 320px !important;
         }
 
         .chart-title {
@@ -300,12 +300,11 @@
             text-align: center;
         }
 
-        /* Special styling for status chart container */
         .status-chart-container {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 20px;
-            height: 450px; /* Slightly taller for pie chart */
+            height: 450px;
         }
 
         .status-chart-container canvas {
@@ -407,6 +406,13 @@
             font-size: 18px;
         }
 
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #dc3545;
+            font-size: 18px;
+        }
+
         @media (max-width: 768px) {
             .filters-grid {
                 grid-template-columns: 1fr;
@@ -435,8 +441,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 United Pharmaceutical</h1>
-            <p>LMS Dashboard - Course Completion Analytics</p>
+            <h1>🏥 United Pharmacies</h1>
+            <p>Learning Management System Dashboard - Course Completion Analytics</p>
         </div>
 
         <div class="stats-container">
@@ -589,7 +595,11 @@
             </div>
 
             <div id="loadingMessage" class="loading">
-                Loading data... ⏳
+                Loading data from Google Sheets... ⏳
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;">
+                Error loading data. Please check the Google Sheet and try again.
             </div>
 
             <div id="tableSection">
@@ -615,42 +625,14 @@
     </div>
 
     <script>
-        // Sample data - Replace with real API data
-<script>
-  let pharmacistsData = []; // متغير عام يقدر أي دالة تستخدمه
+        // Google Sheets configuration
+        const SHEET_ID = '1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ';
+        const SHEET_NAME = 'Sheet1'; // Change if your sheet has a different name
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
 
-  async function loadDataFromSheet() {
-    const sheetID = "1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ"; // غيّر للـ Sheet ID بتاعك
-    const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
-
-    const response = await fetch(apiURL);
-    const text = await response.text();
-
-    const json = JSON.parse(text.substr(47).slice(0, -2));
-    const rows = json.table.rows;
-
-    // خزّن البيانات في المتغير العام
-    pharmacistsData = rows.map(row => ({
-      name: row.c[0]?.v || "",
-      city: row.c[1]?.v || "",
-      district: row.c[2]?.v || "",
-      supervisor: row.c[3]?.v || "",
-      completion: row.c[4]?.v || 0,
-      status: row.c[5]?.v || "",
-      dateCompleted: row.c[6]?.v || ""
-    }));
-
-    // استدعاء باقي الدوال بعد ما البيانات تيجي
-    displayData(pharmacistsData);
-    updateStats(pharmacistsData);
-    updateCharts(pharmacistsData);
-  }
-
-  // أول ما الصفحة تفتح يشغل التحميل
-  loadDataFromSheet();
-</script>
         // Global variables
-        let filteredData = [...pharmacistsData];
+        let pharmacistsData = [];
+        let filteredData = [];
         let selectedCities = [];
         let selectedSupervisors = [];
         let selectedDistricts = [];
@@ -666,24 +648,72 @@
             status: null
         };
 
-        // Initialize dashboard
-        function initDashboard() {
-            setupMultiSelectFilters();
-            setupEventListeners();
-            
-            setTimeout(() => {
+        // Load data from Google Sheets
+        async function loadDataFromSheet() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const text = await response.text();
+                
+                // Remove the callback wrapper from Google's response
+                const jsonText = text.substring(47).slice(0, -2);
+                const data = JSON.parse(jsonText);
+                
+                // Parse the data
+                const rows = data.table.rows;
+                const headers = data.table.cols.map(col => col.label || col.id);
+                
+                pharmacistsData = rows.map(row => {
+                    const rowData = {};
+                    headers.forEach((header, index) => {
+                        const cell = row.c[index];
+                        rowData[header] = cell ? cell.v : '';
+                    });
+                    
+                    // Map the column names to match our expected format
+                    return {
+                        name: rowData['Pharmacist Name'] || rowData['Name'] || '',
+                        city: rowData['City'] || '',
+                        district: rowData['District'] || '',
+                        supervisor: rowData['Supervisor'] || '',
+                        course: rowData['Course'] || rowData['Course Name'] || '',
+                        courseType: rowData['Course Type'] || rowData['Type'] || '',
+                        completion: parseInt(rowData['Completion Rate'] || rowData['Completion'] || 0),
+                        status: rowData['Status'] || '',
+                        dateCompleted: rowData['Date Completed'] || rowData['Date'] || ''
+                    };
+                }).filter(item => item.name); // Filter out empty rows
+
+                filteredData = [...pharmacistsData];
+                
+                // Hide loading message and show data
                 document.getElementById('loadingMessage').style.display = 'none';
                 document.getElementById('dataTable').style.display = 'table';
+                
+                // Initialize dashboard
+                setupMultiSelectFilters();
+                setupEventListeners();
                 updateDashboard();
-            }, 1500);
+                
+            } catch (error) {
+                console.error('Error loading data from Google Sheets:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            loadDataFromSheet();
         }
 
         // Setup multi-select filters
         function setupMultiSelectFilters() {
-            const cities = [...new Set(pharmacistsData.map(p => p.city))];
-            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor))];
-            const districts = [...new Set(pharmacistsData.map(p => p.district))];
-            const courses = [...new Set(pharmacistsData.map(p => p.course))];
+            if (pharmacistsData.length === 0) return;
+            
+            const cities = [...new Set(pharmacistsData.map(p => p.city).filter(city => city))];
+            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor).filter(supervisor => supervisor))];
+            const districts = [...new Set(pharmacistsData.map(p => p.district).filter(district => district))];
+            const courses = [...new Set(pharmacistsData.map(p => p.course).filter(course => course))];
 
             setupMultiSelect('cityMultiSelect', cities, selectedCities);
             setupMultiSelect('supervisorMultiSelect', supervisors, selectedSupervisors);
@@ -990,7 +1020,7 @@
             }
 
             const cityStats = {};
-            const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city))];
+            const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city).filter(city => city))];
             
             citiesToShow.forEach(city => {
                 const cityData = filteredData.filter(p => p.city === city);
@@ -1019,7 +1049,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* This allows height control */
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
                     },
@@ -1046,7 +1076,7 @@
             }
 
             const supervisorStats = {};
-            const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor))];
+            const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor).filter(supervisor => supervisor))];
             
             supervisorsToShow.forEach(supervisor => {
                 const supervisorData = filteredData.filter(p => p.supervisor === supervisor);
@@ -1062,7 +1092,7 @@
             const averages = Object.values(supervisorStats).map(stat => stat.average);
 
             charts.supervisors = new Chart(ctx, {
-                type: 'horizontalBar',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
@@ -1089,13 +1119,12 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* Allows height control */
-                    indexAxis: 'y',
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
                     },
                     scales: {
-                        x: {
+                        y: {
                             beginAtZero: true,
                             max: 100,
                             title: {
@@ -1117,7 +1146,7 @@
             }
 
             const courseStats = {};
-            const coursesToShow = selectedCourses.length > 0 ? selectedCourses : [...new Set(filteredData.map(p => p.course))];
+            const coursesToShow = selectedCourses.length > 0 ? selectedCourses : [...new Set(filteredData.map(p => p.course).filter(course => course))];
             
             coursesToShow.forEach(course => {
                 const courseData = filteredData.filter(p => p.course === course);
@@ -1158,7 +1187,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* Allows height control */
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
                     },
@@ -1216,7 +1245,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* Fixed height */
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -1235,7 +1264,7 @@
             }
 
             const districtStats = {};
-            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district))];
+            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district).filter(district => district))];
             
             districtsToShow.forEach(district => {
                 const districtData = filteredData.filter(p => p.district === district);
@@ -1265,7 +1294,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* Fixed height */
+                    maintainAspectRatio: false,
                     scales: {
                         r: {
                             beginAtZero: true,
@@ -1284,23 +1313,42 @@
                 charts.performance.destroy();
             }
 
-            // Generate sample trend data
-            const dates = [];
-            const completionRates = [];
+            // Generate trend data based on actual completion dates
+            const dateStats = {};
             
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                
-                // Sample data based on filtered results
-                const avgCompletion = filteredData.length > 0 
-                    ? Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length)
-                    : 0;
-                
-                // Add some variance for trend visualization
-                const variance = Math.random() * 20 - 10;
-                completionRates.push(Math.max(0, Math.min(100, avgCompletion + variance)));
+            filteredData.forEach(pharmacist => {
+                const date = pharmacist.dateCompleted;
+                if (date) {
+                    if (!dateStats[date]) {
+                        dateStats[date] = {
+                            total: 0,
+                            count: 0
+                        };
+                    }
+                    dateStats[date].total += pharmacist.completion;
+                    dateStats[date].count += 1;
+                }
+            });
+
+            // Sort dates and calculate averages
+            const sortedDates = Object.keys(dateStats).sort();
+            const dates = sortedDates.map(date => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const completionRates = sortedDates.map(date => Math.round(dateStats[date].total / dateStats[date].count));
+
+            // If no data, show sample trend
+            if (dates.length === 0) {
+                for (let i = 30; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    
+                    const avgCompletion = filteredData.length > 0 
+                        ? Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length)
+                        : 0;
+                    
+                    const variance = Math.random() * 20 - 10;
+                    completionRates.push(Math.max(0, Math.min(100, avgCompletion + variance)));
+                }
             }
 
             charts.performance = new Chart(ctx, {
@@ -1318,7 +1366,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, /* Fixed height */
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
                     },
@@ -1369,7 +1417,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true, /* Keep aspect ratio for pie chart */
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -1384,6 +1432,3 @@
     </script>
 </body>
 </html>
-
-
-
