@@ -934,7 +934,7 @@
             updateCharts();
         }
 
-        // Update statistics cards
+        // Update statistics cards with better handling
         function updateStats() {
             const completed = filteredData.filter(p => p.status === 'Completed').length;
             const progress = filteredData.filter(p => p.status === 'In Progress').length;
@@ -942,27 +942,62 @@
             const averageCompletion = filteredData.length > 0 ? 
                 Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length) : 0;
             
-            animateCounter('completedCount', completed);
-            animateCounter('progressCount', progress);
-            animateCounter('pendingCount', pending);
-            document.getElementById('averageRate').textContent = averageCompletion + '%';
+            // Reset to 0 first if values are dramatically different to avoid confusion
+            const currentCompleted = parseInt(document.getElementById('completedCount').textContent) || 0;
+            const currentProgress = parseInt(document.getElementById('progressCount').textContent) || 0;
+            const currentPending = parseInt(document.getElementById('pendingCount').textContent) || 0;
+            
+            // If the change is too dramatic (more than 50% difference), reset first
+            if (Math.abs(completed - currentCompleted) > Math.max(completed, currentCompleted) * 0.5) {
+                document.getElementById('completedCount').textContent = '0';
+            }
+            if (Math.abs(progress - currentProgress) > Math.max(progress, currentProgress) * 0.5) {
+                document.getElementById('progressCount').textContent = '0';
+            }
+            if (Math.abs(pending - currentPending) > Math.max(pending, currentPending) * 0.5) {
+                document.getElementById('pendingCount').textContent = '0';
+            }
+            
+            // Small delay to show the reset, then animate to new values
+            setTimeout(() => {
+                animateCounter('completedCount', completed);
+                animateCounter('progressCount', progress);
+                animateCounter('pendingCount', pending);
+                document.getElementById('averageRate').textContent = averageCompletion + '%';
+            }, 100);
         }
 
-        // Animate counter
+        // Animate counter with proper handling for decreasing values
         function animateCounter(elementId, targetValue) {
             const element = document.getElementById(elementId);
             const startValue = parseInt(element.textContent) || 0;
-            const increment = targetValue > startValue ? 1 : -1;
+            
+            // If target is 0 or values are the same, set directly
+            if (targetValue === 0 || startValue === targetValue) {
+                element.textContent = targetValue;
+                return;
+            }
+            
+            // For large differences, animate more smoothly
+            const difference = Math.abs(targetValue - startValue);
+            const duration = Math.min(1000, Math.max(300, difference * 20)); // Dynamic duration
+            const steps = Math.min(50, Math.max(10, difference)); // Dynamic steps
+            const stepValue = (targetValue - startValue) / steps;
+            const stepDuration = duration / steps;
+            
             let currentValue = startValue;
+            let stepCount = 0;
 
             const timer = setInterval(() => {
-                currentValue += increment;
-                element.textContent = currentValue;
-
-                if (currentValue === targetValue) {
+                stepCount++;
+                if (stepCount >= steps) {
+                    element.textContent = targetValue; // Ensure exact final value
                     clearInterval(timer);
+                } else {
+                    currentValue += stepValue;
+                    element.textContent = Math.round(currentValue);
                 }
-            }, 50);
+            }, stepDuration);
         }
 
         // Update table
