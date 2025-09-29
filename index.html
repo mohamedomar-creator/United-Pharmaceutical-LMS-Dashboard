@@ -591,7 +591,7 @@
                 </div>
 
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">📍 Districts Performance</h3>
+                    <h3 class="chart-title">👤 Districts Performance</h3>
                     <canvas id="districtsChart"></canvas>
                 </div>
 
@@ -1343,55 +1343,75 @@ const matchesSearch = !searchTerm || fullIdentity === searchTerm;
         }
 
         // Create districts chart
-        function createDistrictsChart() {
-            const ctx = document.getElementById('districtsChart').getContext('2d');
-            
-            if (charts.districts) {
-                charts.districts.destroy();
-            }
+        // Create districts chart
+function createDistrictsChart() {
+    const ctx = document.getElementById('districtsChart').getContext('2d');
+    
+    if (charts.districts) {
+        charts.districts.destroy();
+    }
 
-            const districtStats = {};
-            const districtsToShow = selectedDistricts.length > 0 ? selectedDistricts : [...new Set(filteredData.map(p => p.district).filter(district => district))];
-            
-            districtsToShow.forEach(district => {
-                const districtData = filteredData.filter(p => p.district === district);
-                if (districtData.length > 0) {
-                    districtStats[district] = Math.round(districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length);
-                }
-            });
+    const districtStats = {};
+    const districtsToShow = selectedDistricts.length > 0 
+        ? selectedDistricts 
+        : [...new Set(filteredData.map(p => p.district).filter(district => district))];
+    
+    districtsToShow.forEach(district => {
+        const districtData = filteredData.filter(p => p.district === district);
+        if (districtData.length > 0) {
+            districtStats[district] = Math.round(
+                districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length
+            );
+        }
+    });
 
-            const labels = Object.keys(districtStats);
-            const averages = Object.values(districtStats);
+    const labels = Object.keys(districtStats);
+    const averages = Object.values(districtStats);
 
-            charts.districts = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Completion Rate (%)',
-                        data: averages,
-                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
-                        borderColor: 'rgba(0, 102, 204, 1)',
-                        pointBackgroundColor: 'rgba(0, 102, 204, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(0, 102, 204, 1)',
-                        borderWidth: 3
-                    }]
+    charts.districts = new Chart(ctx, {
+        type: 'bar', // 👈 Bar chart
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Completion Rate (%)',
+                data: averages,
+                backgroundColor: 'rgba(0, 102, 204, 0.7)',
+                borderColor: 'rgba(0, 102, 204, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // 👈 يخليها أفقية
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '📍 Districts Performance'
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100
-                        }
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Districts'
                     }
                 }
-            });
+            }
         }
-
+    });
+}
         // Create performance trend chart
         function createPerformanceChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
@@ -1519,6 +1539,7 @@ const matchesSearch = !searchTerm || fullIdentity === searchTerm;
     </script>
 </body>
 </html>
+
 
 
 
