@@ -883,7 +883,7 @@ searchInput.addEventListener("input", function() {
         const item = document.createElement("div");
         item.innerHTML = `<strong>${p.name}</strong> - ${p.city}`;
         item.addEventListener("click", () => {
-            searchInput.value = p.name; // set chosen name
+           searchInput.value = `${p.name} | ${p.city} | ${p.supervisor}`;
             listContainer.innerHTML = "";
             applyFilters(); // trigger filtering
         });
@@ -906,7 +906,8 @@ document.addEventListener("click", function (e) {
             const dateTo = document.getElementById('dateTo').value;
 
             filteredData = pharmacistsData.filter(pharmacist => {
-                const matchesSearch = pharmacist.name.toLowerCase().includes(searchTerm);
+               const fullIdentity = `${pharmacist.name} | ${pharmacist.city} | ${pharmacist.supervisor}`.toLowerCase();
+const matchesSearch = !searchTerm || fullIdentity === searchTerm;
                 const matchesStatus = !statusFilter || pharmacist.status === statusFilter;
                 const matchesCourseType = !courseTypeFilter || pharmacist.courseType === courseTypeFilter;
                 const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
@@ -1518,6 +1519,7 @@ document.addEventListener("click", function (e) {
     </script>
 </body>
 </html>
+
 
 
 
