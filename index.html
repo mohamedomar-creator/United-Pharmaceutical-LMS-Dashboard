@@ -79,7 +79,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>United Pharmaceuticals</h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <img src="https://raw.githubusercontent.com/mohamedomar-creator/United-Pharmaceutical-LMS-Dashboard/main/united-logo.png.png" alt="United Pharmaceuticals Logo" style="height: 60px;">
+                <h1>United Pharmaceuticals</h1>
+            </div>
             <p>LMS Dashboard - Course Completion Analytics</p>
         </div>
         <div class="stats-container">
@@ -92,9 +95,13 @@
             <h3 style="margin-bottom:20px;color:#333;">🔍 Filters & Search</h3>
             <div class="filters-grid">
                 <div class="filter-group">
-                    <label class="filter-label">Search Pharmacists</label>
-                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Name or email..." autocomplete="off">
+                    <label class="filter-label">Search by Name</label>
+                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Pharmacist name..." autocomplete="off">
                     <div id="autocomplete-list" class="autocomplete-items"></div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search by Email</label>
+                    <input type="text" class="search-input" id="emailSearch" placeholder="Email address..." autocomplete="off">
                 </div>
                 <div class="filter-group"><label class="filter-label">Status</label><select class="filter-select" id="statusFilter"><option value="">All</option><option value="Completed">Completed</option><option value="In Progress">In Progress</option><option value="Pending">Pending</option></select></div>
                 <div class="filter-group"><label class="filter-label">Type</label><select class="filter-select" id="courseTypeFilter"><option value="">All</option><option value="Mandatory">Mandatory</option><option value="Optional">Optional</option></select></div>
@@ -254,23 +261,28 @@ function setupEvents(){
     document.getElementById('toggleTableBtn').addEventListener('click',toggle);
     
     const si=document.getElementById('pharmacistSearch');
+    const ei=document.getElementById('emailSearch');
     const lc=document.getElementById('autocomplete-list');
+    
     si.addEventListener('input',function(){
         const v=this.value.toLowerCase().trim();
         lc.innerHTML='';
         if(!v)return;
-        const m=data.filter(p=>p.name.toLowerCase().includes(v)||(p.email&&p.email.toLowerCase().includes(v)));
+        const m=data.filter(p=>p.name.toLowerCase().includes(v));
         m.slice(0,10).forEach(p=>{
             const it=document.createElement('div');
             it.innerHTML=`<strong>${p.name}</strong>${p.email?' - '+p.email:''} - ${p.city}`;
             it.addEventListener('click',()=>{
-                si.value=`${p.name}${p.email?' | '+p.email:''} | ${p.city}`;
+                si.value=p.name;
                 lc.innerHTML='';
                 filter();
             });
             lc.appendChild(it);
         });
     });
+    
+    ei.addEventListener('input',filter);
+    
     document.addEventListener('click',e=>{
         if(e.target!==si)lc.innerHTML='';
     });
@@ -278,13 +290,14 @@ function setupEvents(){
 
 function filter(){
     const st=document.getElementById('pharmacistSearch').value.toLowerCase();
+    const et=document.getElementById('emailSearch').value.toLowerCase();
     const sf=document.getElementById('statusFilter').value;
     const cf=document.getElementById('courseTypeFilter').value;
     const df=document.getElementById('dateFrom').value;
     const dt=document.getElementById('dateTo').value;
     filtered=data.filter(p=>{
-        const fi=`${p.name}${p.email?' | '+p.email:''} | ${p.city}`.toLowerCase();
-        const ms=!st||fi.includes(st)||p.name.toLowerCase().includes(st)||(p.email&&p.email.toLowerCase().includes(st));
+        const ms=!st||p.name.toLowerCase().includes(st);
+        const me=!et||(p.email&&p.email.toLowerCase().includes(et));
         const mst=!sf||p.status===sf;
         const mct=!cf||p.courseType===cf;
         const mci=selC.length===0||selC.includes(p.city);
@@ -297,13 +310,14 @@ function filter(){
             if(df&&pd<new Date(df))md=false;
             if(dt&&pd>new Date(dt))md=false;
         }
-        return ms&&mst&&mct&&mci&&msu&&mdi&&mco&&md;
+        return ms&&me&&mst&&mct&&mci&&msu&&mdi&&mco&&md;
     });
     update();
 }
 
 function clear(){
     document.getElementById('pharmacistSearch').value='';
+    document.getElementById('emailSearch').value='';
     document.getElementById('statusFilter').value='';
     document.getElementById('courseTypeFilter').value='';
     document.getElementById('dateFrom').value='';
