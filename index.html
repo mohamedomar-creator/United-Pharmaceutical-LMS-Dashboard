@@ -6,1545 +6,499 @@
     <title>United Pharmaceuticals - LMS Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #0066cc 0%, #004080 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(45deg, #0066cc, #004080);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 1.3em;
-            opacity: 0.9;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 30px;
-            background: #f8f9fa;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-            border-left: 5px solid transparent;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card .icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            display: block;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #0066cc 0%, #004080 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); overflow: hidden; }
+        .header { background: linear-gradient(45deg, #0066cc, #004080); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.8em; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 1.3em; opacity: 0.9; }
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; border-left: 5px solid transparent; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); }
+        .stat-card .icon { font-size: 3em; margin-bottom: 15px; display: block; }
         .stat-card.completed { border-left-color: #28a745; }
         .stat-card.completed .icon { color: #28a745; }
-        
         .stat-card.progress { border-left-color: #ffc107; }
         .stat-card.progress .icon { color: #ffc107; }
-        
         .stat-card.pending { border-left-color: #dc3545; }
         .stat-card.pending .icon { color: #dc3545; }
-        
         .stat-card.average { border-left-color: #17a2b8; }
         .stat-card.average .icon { color: #17a2b8; }
-
-        .stat-card .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .label {
-            color: #666;
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-
-        .filters-section {
-            padding: 30px;
-            background: white;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .filter-label {
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .search-input, .filter-select, .date-input {
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .search-input:focus, .filter-select:focus, .date-input:focus {
-            outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-        }
-
-        .multi-select {
-            position: relative;
-        }
-
-        .multi-select-trigger {
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .multi-select-trigger:hover {
-            border-color: #0066cc;
-        }
-
-        .multi-select-trigger::after {
-            content: "▼";
-            font-size: 12px;
-            color: #666;
-        }
-
-        .multi-select-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid #0066cc;
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .multi-select-option {
-            padding: 10px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .multi-select-option:last-child {
-            border-bottom: none;
-        }
-
-        .multi-select-option:hover {
-            background: #f8f9fa;
-        }
-
-        .multi-select-option input[type="checkbox"] {
-            margin: 0;
-            cursor: pointer;
-        }
-
-        .multi-select-option label {
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
-        }
-
-        .selected-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 8px;
-            min-height: 20px;
-        }
-
-        .selected-item {
-            background: #0066cc;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 15px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .remove-item {
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .remove-item:hover {
-            color: #ff6b6b;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: #0066cc;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0052a3;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .chart-container {
-            padding: 30px;
-            background: white;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-wrapper {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            height: 400px;
-        }
-
-        .chart-wrapper canvas {
-            max-height: 320px !important;
-        }
-
-        .chart-title {
-            font-size: 1.4em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-
-        .status-chart-container {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            height: 450px;
-        }
-
-        .status-chart-container canvas {
-            max-height: 350px !important;
-        }
-
-        .table-container {
-            padding: 30px;
-            background: white;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        th {
-            background: linear-gradient(45deg, #0066cc, #004080);
-            color: white;
-            padding: 15px 12px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        td {
-            padding: 15px 12px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s ease;
-        }
-
-        tr:hover td {
-            background-color: #f8f9fa;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-completed {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-progress {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-pending {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .course-mandatory {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .course-optional {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #28a745, #20c997);
-            transition: width 0.3s ease;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #666;
-            font-size: 18px;
-        }
-
-        .error {
-            text-align: center;
-            padding: 50px;
-            color: #dc3545;
-            font-size: 18px;
-        }
-
-        @media (max-width: 768px) {
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-container {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .table-header {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-        .autocomplete-items {
-  border: 1px solid #d4d4d4;
-  border-top: none;
-  max-height: 200px;
-  overflow-y: auto;
-  position: absolute;
-  background: white;
-  z-index: 99;
-  width: 250px;
-}
-.autocomplete-items div {
-  padding: 8px;
-  cursor: pointer;
-}
-.autocomplete-items div:hover {
-  background-color: #e9e9e9;
-}
+        .stat-card .number { font-size: 2.5em; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .stat-card .label { color: #666; font-size: 1.1em; font-weight: 600; }
+        .filters-section { padding: 30px; background: white; border-bottom: 2px solid #f0f0f0; }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .filter-label { font-weight: 600; color: #333; font-size: 14px; }
+        .search-input, .filter-select, .date-input { padding: 12px 16px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; transition: all 0.3s ease; font-family: inherit; }
+        .search-input:focus, .filter-select:focus, .date-input:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1); }
+        .multi-select { position: relative; }
+        .multi-select-trigger { padding: 12px 16px; border: 2px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 14px; transition: all 0.3s ease; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+        .multi-select-trigger:hover { border-color: #0066cc; }
+        .multi-select-trigger::after { content: "▼"; font-size: 12px; color: #666; }
+        .multi-select-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #0066cc; border-radius: 10px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        .multi-select-option { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+        .multi-select-option:hover { background: #f8f9fa; }
+        .multi-select-option input[type="checkbox"] { margin: 0; cursor: pointer; }
+        .multi-select-option label { cursor: pointer; font-size: 14px; flex: 1; }
+        .selected-items { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; min-height: 20px; }
+        .selected-item { background: #0066cc; color: white; padding: 4px 8px; border-radius: 15px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        .remove-item { cursor: pointer; font-weight: bold; font-size: 14px; }
+        .remove-item:hover { color: #ff6b6b; }
+        .autocomplete-items { border: 1px solid #d4d4d4; border-top: none; max-height: 200px; overflow-y: auto; position: absolute; background: white; z-index: 99; width: 100%; border-radius: 0 0 10px 10px; margin-top: -2px; }
+        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+        .autocomplete-items div:hover { background-color: #e9e9e9; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; }
+        .btn-primary { background: #0066cc; color: white; }
+        .btn-primary:hover { background: #0052a3; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .chart-container { padding: 30px; background: white; }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .chart-wrapper { background: #f8f9fa; border-radius: 15px; padding: 20px; height: 400px; }
+        .chart-title { font-size: 1.4em; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .status-chart-container { background: #f8f9fa; border-radius: 15px; padding: 20px; height: 450px; }
+        .table-container { padding: 30px; background: white; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        th { background: linear-gradient(45deg, #0066cc, #004080); color: white; padding: 15px 12px; text-align: center; font-weight: 600; font-size: 14px; }
+        td { padding: 15px 12px; text-align: center; border-bottom: 1px solid #eee; }
+        tr:hover td { background-color: #f8f9fa; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .status-completed { background-color: #d4edda; color: #155724; }
+        .status-progress { background-color: #fff3cd; color: #856404; }
+        .status-pending { background-color: #f8d7da; color: #721c24; }
+        .course-mandatory { background-color: #f8d7da; color: #721c24; }
+        .course-optional { background-color: #d1ecf1; color: #0c5460; }
+        .progress-bar { width: 100%; height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease; }
+        .loading { text-align: center; padding: 50px; color: #666; font-size: 18px; }
+        .error { text-align: center; padding: 50px; color: #dc3545; font-size: 18px; }
     </style>
 </head>
 <body>
     <div class="container">
-     <div class="header">
-  <img src="united-logo.png.png" alt="United Pharmacies Logo" style="height:50px; vertical-align:middle; margin-right:10px;">
-  <h1 style="display:inline-block; vertical-align:middle; margin:0;">United Pharmaceuticals</h1>
-    <p>LMS Dashboard - Course Completion Analytics</p>
-</div>
-        <div class="stats-container">
-            <div class="stat-card completed">
-                <span class="icon">✅</span>
-                <div class="number" id="completedCount">0</div>
-                <div class="label">Completed</div>
-            </div>
-            <div class="stat-card progress">
-                <span class="icon">⏳</span>
-                <div class="number" id="progressCount">0</div>
-                <div class="label">In Progress</div>
-            </div>
-            <div class="stat-card pending">
-                <span class="icon">⏸️</span>
-                <div class="number" id="pendingCount">0</div>
-                <div class="label">Pending</div>
-            </div>
-            <div class="stat-card average">
-                <span class="icon">📊</span>
-                <div class="number" id="averageRate">0%</div>
-                <div class="label">Average Rate</div>
-            </div>
+        <div class="header">
+            <h1>United Pharmaceuticals</h1>
+            <p>LMS Dashboard - Course Completion Analytics</p>
         </div>
-
+        <div class="stats-container">
+            <div class="stat-card completed"><span class="icon">✅</span><div class="number" id="completedCount">0</div><div class="label">Completed</div></div>
+            <div class="stat-card progress"><span class="icon">⏳</span><div class="number" id="progressCount">0</div><div class="label">In Progress</div></div>
+            <div class="stat-card pending"><span class="icon">⏸️</span><div class="number" id="pendingCount">0</div><div class="label">Pending</div></div>
+            <div class="stat-card average"><span class="icon">📊</span><div class="number" id="averageRate">0%</div><div class="label">Average (Completed)</div></div>
+        </div>
         <div class="filters-section">
-            <h3 style="margin-bottom: 20px; color: #333;">🔍 Filters & Search</h3>
+            <h3 style="margin-bottom:20px;color:#333;">🔍 Filters & Search</h3>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label class="filter-label">Search Pharmacists</label>
-                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Search by name...">
+                    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Name or email..." autocomplete="off">
+                    <div id="autocomplete-list" class="autocomplete-items"></div>
                 </div>
-                <div class="filter-group" style="position: relative;">
-    <label class="filter-label">Search Pharmacists</label>
-    <input type="text" class="search-input" id="pharmacistSearch" placeholder="Search by name..." autocomplete="off">
-    <div id="autocomplete-list" class="autocomplete-items"></div>
-</div>          
-                <div class="filter-group">
-                    <label class="filter-label">Status</label>
-                    <select class="filter-select" id="statusFilter">
-                        <option value="">All Statuses</option>
-                        <option value="Completed">Completed</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Pending">Pending</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Course Type</label>
-                    <select class="filter-select" id="courseTypeFilter">
-                        <option value="">All Types</option>
-                        <option value="Mandatory">Mandatory</option>
-                        <option value="Optional">Optional</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">From Date</label>
-                    <input type="date" class="date-input" id="dateFrom">
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">To Date</label>
-                    <input type="date" class="date-input" id="dateTo">
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Cities</label>
-                    <div class="multi-select" id="cityMultiSelect">
-                        <div class="multi-select-trigger">Select Cities...</div>
-                        <div class="multi-select-dropdown" id="cityDropdown"></div>
-                        <div class="selected-items" id="selectedCities"></div>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Supervisors</label>
-                    <div class="multi-select" id="supervisorMultiSelect">
-                        <div class="multi-select-trigger">Select Supervisors...</div>
-                        <div class="multi-select-dropdown" id="supervisorDropdown"></div>
-                        <div class="selected-items" id="selectedSupervisors"></div>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Districts</label>
-                    <div class="multi-select" id="districtMultiSelect">
-                        <div class="multi-select-trigger">Select Districts...</div>
-                        <div class="multi-select-dropdown" id="districtDropdown"></div>
-                        <div class="selected-items" id="selectedDistricts"></div>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Courses</label>
-                    <div class="multi-select" id="courseMultiSelect">
-                        <div class="multi-select-trigger">Select Courses...</div>
-                        <div class="multi-select-dropdown" id="courseDropdown"></div>
-                        <div class="selected-items" id="selectedCourses"></div>
-                    </div>
-                </div>
-
-                <div class="filter-group" style="align-self: end;">
-                    <button class="btn btn-secondary" id="clearFilters">Clear All Filters</button>
-                </div>
+                <div class="filter-group"><label class="filter-label">Status</label><select class="filter-select" id="statusFilter"><option value="">All</option><option value="Completed">Completed</option><option value="In Progress">In Progress</option><option value="Pending">Pending</option></select></div>
+                <div class="filter-group"><label class="filter-label">Type</label><select class="filter-select" id="courseTypeFilter"><option value="">All</option><option value="Mandatory">Mandatory</option><option value="Optional">Optional</option></select></div>
+                <div class="filter-group"><label class="filter-label">From Date</label><input type="date" class="date-input" id="dateFrom"></div>
+                <div class="filter-group"><label class="filter-label">To Date</label><input type="date" class="date-input" id="dateTo"></div>
+                <div class="filter-group"><label class="filter-label">Cities</label><div class="multi-select" id="cityMultiSelect"><div class="multi-select-trigger">Select...</div><div class="multi-select-dropdown" id="cityDropdown"></div><div class="selected-items" id="selectedCities"></div></div></div>
+                <div class="filter-group"><label class="filter-label">Supervisors</label><div class="multi-select" id="supervisorMultiSelect"><div class="multi-select-trigger">Select...</div><div class="multi-select-dropdown" id="supervisorDropdown"></div><div class="selected-items" id="selectedSupervisors"></div></div></div>
+                <div class="filter-group"><label class="filter-label">Districts</label><div class="multi-select" id="districtMultiSelect"><div class="multi-select-trigger">Select...</div><div class="multi-select-dropdown" id="districtDropdown"></div><div class="selected-items" id="selectedDistricts"></div></div></div>
+                <div class="filter-group"><label class="filter-label">Courses</label><div class="multi-select" id="courseMultiSelect"><div class="multi-select-trigger">Select...</div><div class="multi-select-dropdown" id="courseDropdown"></div><div class="selected-items" id="selectedCourses"></div></div></div>
+                <div class="filter-group" style="align-self:end;"><button class="btn btn-secondary" id="clearFilters">Clear All</button></div>
             </div>
         </div>
-
         <div class="chart-container">
             <div class="charts-grid">
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">🏙️ Cities Performance</h3>
-                    <canvas id="citiesChart"></canvas>
-                </div>
-
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">👥 Supervisors Performance</h3>
-                    <canvas id="supervisorsChart"></canvas>
-                </div>
-
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">📚 Courses Performance</h3>
-                    <canvas id="coursesChart"></canvas>
-                </div>
-
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">📖 Mandatory vs Optional</h3>
-                    <canvas id="courseTypesChart"></canvas>
-                </div>
-
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">👤 Districts Performance</h3>
-                    <canvas id="districtsChart"></canvas>
-                </div>
-
-                <div class="chart-wrapper">
-                    <h3 class="chart-title">📈 Performance Trend</h3>
-                    <canvas id="performanceChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><h3 class="chart-title">🏙️ Cities Performance</h3><canvas id="citiesChart"></canvas></div>
+                <div class="chart-wrapper"><h3 class="chart-title">👥 Supervisors Performance</h3><canvas id="supervisorsChart"></canvas></div>
+                <div class="chart-wrapper"><h3 class="chart-title">📚 Courses Performance</h3><canvas id="coursesChart"></canvas></div>
+                <div class="chart-wrapper"><h3 class="chart-title">📖 Mandatory vs Optional</h3><canvas id="courseTypesChart"></canvas></div>
+                <div class="chart-wrapper"><h3 class="chart-title">👤 Districts Performance</h3><canvas id="districtsChart"></canvas></div>
+                <div class="chart-wrapper"><h3 class="chart-title">📈 Performance Trend</h3><canvas id="performanceChart"></canvas></div>
             </div>
-
-            <div class="status-chart-container">
-                <h3 class="chart-title">📊 Status Distribution</h3>
-                <div style="max-width: 350px; margin: 0 auto; height: 300px;">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
+            <div class="status-chart-container"><h3 class="chart-title">📊 Status Distribution</h3><div style="max-width:350px;margin:0 auto;height:350px;"><canvas id="statusChart"></canvas></div></div>
         </div>
-
         <div class="table-container">
-            <div class="table-header">
-                <h3 style="color: #333; margin: 0;">📋 Pharmacists Data</h3>
-                <button class="btn btn-primary" id="toggleTableBtn">Hide Table</button>
-            </div>
-
-            <div id="loadingMessage" class="loading">
-                Loading data from Google Sheets... ⏳
-            </div>
-
-            <div id="errorMessage" class="error" style="display: none;">
-                Error loading data. Please check the Google Sheet and try again.
-            </div>
-
-            <div id="tableSection">
-                <table id="dataTable" style="display: none;">
-                    <thead>
-                        <tr>
-                            <th>Pharmacist</th>
-                            <th>City</th>
-                            <th>District</th>
-                            <th>Supervisor</th>
-                            <th>Course</th>
-                            <th>Type</th>
-                            <th>Completion</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                    </tbody>
-                </table>
-            </div>
+            <div class="table-header"><h3 style="color:#333;margin:0;">📋 Pharmacists Data</h3><button class="btn btn-primary" id="toggleTableBtn">Hide Table</button></div>
+            <div id="loadingMessage" class="loading">Loading data from Google Sheets...</div>
+            <div id="errorMessage" class="error" style="display:none;">Error loading data. Please check your connection.</div>
+            <div id="tableSection"><table id="dataTable" style="display:none;"><thead><tr><th>Name</th><th>Email</th><th>City</th><th>District</th><th>Supervisor</th><th>Course</th><th>Type</th><th>Completion</th><th>Status</th><th>Date</th></tr></thead><tbody id="tableBody"></tbody></table></div>
         </div>
     </div>
-
     <script>
-        // Google Sheets configuration
-        const SHEET_ID = '1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ';
-        const SHEET_NAME = 'Sheet1'; // Change if your sheet has a different name
-        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+const SHEET_ID='1GLqdVQbTqKs4y7IMYtQITYgOCMZGtYOLiH84pFCeBDQ';
+const SHEET_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+let data=[],filtered=[],selC=[],selS=[],selD=[],selCo=[],charts={};
 
-        // Global variables
-        let pharmacistsData = [];
-        let filteredData = [];
-        let selectedCities = [];
-        let selectedSupervisors = [];
-        let selectedDistricts = [];
-        let selectedCourses = [];
-        
-        let charts = {
-            cities: null,
-            supervisors: null,
-            courses: null,
-            courseTypes: null,
-            districts: null,
-            performance: null,
-            status: null
-        };
+async function load(){
+    try{
+        const r=await fetch(SHEET_URL);
+        const t=await r.text();
+        const j=JSON.parse(t.substring(47).slice(0,-2));
+        const rows=j.table.rows;
+        const h=j.table.cols.map(c=>c.label||c.id);
+        data=rows.map(row=>{
+            const rd={};
+            h.forEach((hd,i)=>{
+                const cell=row.c[i];
+                rd[hd]=cell?cell.v:'';
+            });
+            return{
+                name:rd['Pharmacist Name']||rd['Name']||'',
+                email:rd['Email']||'',
+                city:rd['City']||'',
+                district:rd['District']||'',
+                supervisor:rd['Supervisor']||'',
+                course:rd['Course']||rd['Course Name']||'',
+                courseType:rd['Course Type']||rd['Type']||'',
+                completion:parseInt(rd['Completion Rate']||rd['Completion']||0),
+                status:rd['Status']||'',
+                dateCompleted:rd['Date Completed']||rd['Date']||''
+            };
+        }).filter(i=>i.name);
+        filtered=[...data];
+        document.getElementById('loadingMessage').style.display='none';
+        document.getElementById('dataTable').style.display='table';
+        setupFilters();
+        setupEvents();
+        update();
+    }catch(e){
+        console.error(e);
+        document.getElementById('loadingMessage').style.display='none';
+        document.getElementById('errorMessage').style.display='block';
+    }
+}
 
-        // Load data from Google Sheets
-        async function loadDataFromSheet() {
-            try {
-                const response = await fetch(SHEET_URL);
-                const text = await response.text();
-                
-                // Remove the callback wrapper from Google's response
-                const jsonText = text.substring(47).slice(0, -2);
-                const data = JSON.parse(jsonText);
-                
-                // Parse the data
-                const rows = data.table.rows;
-                const headers = data.table.cols.map(col => col.label || col.id);
-                
-                pharmacistsData = rows.map(row => {
-                    const rowData = {};
-                    headers.forEach((header, index) => {
-                        const cell = row.c[index];
-                        rowData[header] = cell ? cell.v : '';
-                    });
-                    
-                    // Map the column names to match our expected format
-                    return {
-                        name: rowData['Pharmacist Name'] || rowData['Name'] || '',
-                        city: rowData['City'] || '',
-                        district: rowData['District'] || '',
-                        supervisor: rowData['Supervisor'] || '',
-                        course: rowData['Course'] || rowData['Course Name'] || '',
-                        courseType: rowData['Course Type'] || rowData['Type'] || '',
-                        completion: parseInt(rowData['Completion Rate'] || rowData['Completion'] || 0),
-                        status: rowData['Status'] || '',
-                        dateCompleted: rowData['Date Completed'] || rowData['Date'] || ''
-                    };
-                }).filter(item => item.name); // Filter out empty rows
+function setupFilters(){
+    if(!data.length)return;
+    const cities=[...new Set(data.map(p=>p.city).filter(c=>c))];
+    const supervisors=[...new Set(data.map(p=>p.supervisor).filter(s=>s))];
+    const districts=[...new Set(data.map(p=>p.district).filter(d=>d))];
+    const courses=[...new Set(data.map(p=>p.course).filter(c=>c))];
+    setupMS('cityMultiSelect',cities,selC);
+    setupMS('supervisorMultiSelect',supervisors,selS);
+    setupMS('districtMultiSelect',districts,selD);
+    setupMS('courseMultiSelect',courses,selCo);
+}
 
-                filteredData = [...pharmacistsData];
-                
-                // Hide loading message and show data
-                document.getElementById('loadingMessage').style.display = 'none';
-                document.getElementById('dataTable').style.display = 'table';
-                
-                // Initialize dashboard
-                setupMultiSelectFilters();
-                setupEventListeners();
-                updateDashboard();
-                
-            } catch (error) {
-                console.error('Error loading data from Google Sheets:', error);
-                document.getElementById('loadingMessage').style.display = 'none';
-                document.getElementById('errorMessage').style.display = 'block';
+function setupMS(id,opts,arr){
+    const cont=document.getElementById(id);
+    const trig=cont.querySelector('.multi-select-trigger');
+    const drop=cont.querySelector('.multi-select-dropdown');
+    const selCont=cont.querySelector('.selected-items');
+    drop.innerHTML='';
+    opts.forEach((opt,i)=>{
+        const div=document.createElement('div');
+        div.className='multi-select-option';
+        const cb=document.createElement('input');
+        cb.type='checkbox';
+        cb.id=`${id}_${i}`;
+        cb.value=opt;
+        const lbl=document.createElement('label');
+        lbl.htmlFor=cb.id;
+        lbl.textContent=opt;
+        div.appendChild(cb);
+        div.appendChild(lbl);
+        drop.appendChild(div);
+        cb.addEventListener('change',()=>{
+            if(cb.checked){
+                if(!arr.includes(opt))arr.push(opt);
+            }else{
+                const idx=arr.indexOf(opt);
+                if(idx>-1)arr.splice(idx,1);
             }
-        }
-
-        // Initialize dashboard
-        function initDashboard() {
-            loadDataFromSheet();
-        }
-
-        // Setup multi-select filters
-        function setupMultiSelectFilters() {
-            if (pharmacistsData.length === 0) return;
-            
-            const cities = [...new Set(pharmacistsData.map(p => p.city).filter(city => city))];
-            const supervisors = [...new Set(pharmacistsData.map(p => p.supervisor).filter(supervisor => supervisor))];
-            const districts = [...new Set(pharmacistsData.map(p => p.district).filter(district => district))];
-            const courses = [...new Set(pharmacistsData.map(p => p.course).filter(course => course))];
-
-            setupMultiSelect('cityMultiSelect', cities, selectedCities);
-            setupMultiSelect('supervisorMultiSelect', supervisors, selectedSupervisors);
-            setupMultiSelect('districtMultiSelect', districts, selectedDistricts);
-            setupMultiSelect('courseMultiSelect', courses, selectedCourses);
-        }
-
-        // Setup individual multi-select
-        function setupMultiSelect(containerId, options, selectedArray) {
-            const container = document.getElementById(containerId);
-            const trigger = container.querySelector('.multi-select-trigger');
-            const dropdown = container.querySelector('.multi-select-dropdown');
-            const selectedContainer = container.querySelector('.selected-items');
-
-            // Create options
-            dropdown.innerHTML = '';
-            options.forEach((option, index) => {
-                const div = document.createElement('div');
-                div.className = 'multi-select-option';
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `${containerId}_${index}`;
-                checkbox.value = option;
-
-                const label = document.createElement('label');
-                label.htmlFor = checkbox.id;
-                label.textContent = option;
-
-                div.appendChild(checkbox);
-                div.appendChild(label);
-                dropdown.appendChild(div);
-
-                // Add event listener
-                checkbox.addEventListener('change', () => {
-                    if (checkbox.checked) {
-                        if (!selectedArray.includes(option)) {
-                            selectedArray.push(option);
-                        }
-                    } else {
-                        const index = selectedArray.indexOf(option);
-                        if (index > -1) {
-                            selectedArray.splice(index, 1);
-                        }
-                    }
-                    updateSelectedItems(selectedContainer, selectedArray, containerId);
-                    applyFilters();
-                });
-            });
-
-            // Toggle dropdown
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isVisible = dropdown.style.display === 'block';
-                
-                // Close all dropdowns
-                document.querySelectorAll('.multi-select-dropdown').forEach(d => {
-                    d.style.display = 'none';
-                });
-                
-                // Toggle current dropdown
-                dropdown.style.display = isVisible ? 'none' : 'block';
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!container.contains(e.target)) {
-                    dropdown.style.display = 'none';
-                }
-            });
-
-            // Prevent closing when clicking inside dropdown
-            dropdown.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-
-        // Update selected items display
-        function updateSelectedItems(container, selectedArray, containerId) {
-            container.innerHTML = '';
-            
-            selectedArray.forEach(item => {
-                const span = document.createElement('span');
-                span.className = 'selected-item';
-                span.innerHTML = `${item} <span class="remove-item" data-value="${item}">×</span>`;
-                
-                const removeBtn = span.querySelector('.remove-item');
-                removeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removeSelectedItem(item, selectedArray, containerId);
-                });
-                
-                container.appendChild(span);
-            });
-
-            // Update trigger text
-            const trigger = container.parentElement.querySelector('.multi-select-trigger');
-            if (selectedArray.length === 0) {
-                const type = containerId.replace('MultiSelect', '');
-                trigger.textContent = `Select ${type.charAt(0).toUpperCase() + type.slice(1)}...`;
-            } else {
-                trigger.textContent = `${selectedArray.length} selected`;
-            }
-        }
-
-        // Remove selected item
-        function removeSelectedItem(value, selectedArray, containerId) {
-            const index = selectedArray.indexOf(value);
-            if (index > -1) {
-                selectedArray.splice(index, 1);
-                
-                // Uncheck corresponding checkbox
-                const checkbox = document.querySelector(`#${containerId} input[value="${value}"]`);
-                if (checkbox) checkbox.checked = false;
-                
-                const container = document.querySelector(`#${containerId} .selected-items`);
-                updateSelectedItems(container, selectedArray, containerId);
-                applyFilters();
-            }
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            document.getElementById('courseTypeFilter').addEventListener('change', applyFilters);
-            document.getElementById('dateFrom').addEventListener('change', applyFilters);
-            document.getElementById('dateTo').addEventListener('change', applyFilters);
-            document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
-            document.getElementById('toggleTableBtn').addEventListener('click', toggleTable);
-        }
-        // Autocomplete for pharmacist search
-const searchInput = document.getElementById("pharmacistSearch");
-const listContainer = document.getElementById("autocomplete-list");
-
-searchInput.addEventListener("input", function() {
-    const val = this.value.toLowerCase().trim();
-    listContainer.innerHTML = "";
-
-    if (!val) return;
-
-    const matches = pharmacistsData.filter(p =>
-        p.name.toLowerCase().includes(val)
-    );
-
-    matches.forEach(p => {
-        const item = document.createElement("div");
-        item.innerHTML = `<strong>${p.name}</strong> - ${p.city}`;
-        item.addEventListener("click", () => {
-           searchInput.value = `${p.name} | ${p.city} | ${p.supervisor}`;
-            listContainer.innerHTML = "";
-            applyFilters(); // trigger filtering
+            updateSel(selCont,arr,id);
+            filter();
         });
-        listContainer.appendChild(item);
     });
-});
-
-// hide dropdown when clicking outside
-document.addEventListener("click", function (e) {
-    if (e.target !== searchInput) {
-        listContainer.innerHTML = "";
-    }
-});
-        // Apply filters
-        function applyFilters() {
-            const searchTerm = document.getElementById('pharmacistSearch').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const courseTypeFilter = document.getElementById('courseTypeFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-
-            filteredData = pharmacistsData.filter(pharmacist => {
-               const fullIdentity = `${pharmacist.name} | ${pharmacist.city} | ${pharmacist.supervisor}`.toLowerCase();
-const matchesSearch = !searchTerm || fullIdentity === searchTerm;
-                const matchesStatus = !statusFilter || pharmacist.status === statusFilter;
-                const matchesCourseType = !courseTypeFilter || pharmacist.courseType === courseTypeFilter;
-                const matchesCity = selectedCities.length === 0 || selectedCities.includes(pharmacist.city);
-                const matchesSupervisor = selectedSupervisors.length === 0 || selectedSupervisors.includes(pharmacist.supervisor);
-                const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(pharmacist.district);
-                const matchesCourse = selectedCourses.length === 0 || selectedCourses.includes(pharmacist.course);
-                
-                let matchesDate = true;
-                if (dateFrom || dateTo) {
-                    const pharmacistDate = new Date(pharmacist.dateCompleted);
-                    if (dateFrom && pharmacistDate < new Date(dateFrom)) matchesDate = false;
-                    if (dateTo && pharmacistDate > new Date(dateTo)) matchesDate = false;
-                }
-
-                return matchesSearch && matchesStatus && matchesCourseType && 
-                       matchesCity && matchesSupervisor && matchesDistrict && 
-                       matchesCourse && matchesDate;
-            });
-
-            updateDashboard();
-        }
-
-        // Clear all filters
-        function clearAllFilters() {
-            document.getElementById('pharmacistSearch').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('courseTypeFilter').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-            
-            selectedCities.length = 0;
-            selectedSupervisors.length = 0;
-            selectedDistricts.length = 0;
-            selectedCourses.length = 0;
-            
-            // Reset all checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-            });
-            
-            // Reset selected items displays
-            document.querySelectorAll('.selected-items').forEach(container => {
-                container.innerHTML = '';
-            });
-            
-            // Reset trigger texts
-            document.getElementById('cityMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Cities...';
-            document.getElementById('supervisorMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Supervisors...';
-            document.getElementById('districtMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Districts...';
-            document.getElementById('courseMultiSelect').querySelector('.multi-select-trigger').textContent = 'Select Courses...';
-            
-            filteredData = [...pharmacistsData];
-            updateDashboard();
-        }
-
-        // Toggle table visibility
-        function toggleTable() {
-            const tableSection = document.getElementById('tableSection');
-            const toggleBtn = document.getElementById('toggleTableBtn');
-            
-            if (tableSection.style.display === 'none') {
-                tableSection.style.display = 'block';
-                toggleBtn.textContent = 'Hide Table';
-                toggleBtn.className = 'btn btn-primary';
-            } else {
-                tableSection.style.display = 'none';
-                toggleBtn.textContent = 'Show Table';
-                toggleBtn.className = 'btn btn-secondary';
-            }
-        }
-
-        // Update entire dashboard
-        function updateDashboard() {
-            updateStats();
-            updateTable();
-            updateCharts();
-        }
-
-        // Update statistics cards with better handling
-        function updateStats() {
-            const completed = filteredData.filter(p => p.status === 'Completed').length;
-            const progress = filteredData.filter(p => p.status === 'In Progress').length;
-            const pending = filteredData.filter(p => p.status === 'Pending').length;
-            const averageCompletion = filteredData.length > 0 ? 
-                Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length) : 0;
-            
-            // Reset to 0 first if values are dramatically different to avoid confusion
-            const currentCompleted = parseInt(document.getElementById('completedCount').textContent) || 0;
-            const currentProgress = parseInt(document.getElementById('progressCount').textContent) || 0;
-            const currentPending = parseInt(document.getElementById('pendingCount').textContent) || 0;
-            
-            // If the change is too dramatic (more than 50% difference), reset first
-            if (Math.abs(completed - currentCompleted) > Math.max(completed, currentCompleted) * 0.5) {
-                document.getElementById('completedCount').textContent = '0';
-            }
-            if (Math.abs(progress - currentProgress) > Math.max(progress, currentProgress) * 0.5) {
-                document.getElementById('progressCount').textContent = '0';
-            }
-            if (Math.abs(pending - currentPending) > Math.max(pending, currentPending) * 0.5) {
-                document.getElementById('pendingCount').textContent = '0';
-            }
-            
-            // Small delay to show the reset, then animate to new values
-            setTimeout(() => {
-                animateCounter('completedCount', completed);
-                animateCounter('progressCount', progress);
-                animateCounter('pendingCount', pending);
-                document.getElementById('averageRate').textContent = averageCompletion + '%';
-            }, 100);
-        }
-
-        // Animate counter with proper handling for decreasing values
-        function animateCounter(elementId, targetValue) {
-            const element = document.getElementById(elementId);
-            const startValue = parseInt(element.textContent) || 0;
-            
-            // If target is 0 or values are the same, set directly
-            if (targetValue === 0 || startValue === targetValue) {
-                element.textContent = targetValue;
-                return;
-            }
-            
-            // For large differences, animate more smoothly
-            const difference = Math.abs(targetValue - startValue);
-            const duration = Math.min(1000, Math.max(300, difference * 20)); // Dynamic duration
-            const steps = Math.min(50, Math.max(10, difference)); // Dynamic steps
-            const stepValue = (targetValue - startValue) / steps;
-            const stepDuration = duration / steps;
-            
-            let currentValue = startValue;
-            let stepCount = 0;
-
-            const timer = setInterval(() => {
-                stepCount++;
-                if (stepCount >= steps) {
-                    element.textContent = targetValue; // Ensure exact final value
-                    clearInterval(timer);
-                } else {
-                    currentValue += stepValue;
-                    element.textContent = Math.round(currentValue);
-                }
-            }, stepDuration);
-        }
-
-        // Update table
-        function updateTable() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            filteredData.forEach(pharmacist => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${pharmacist.name}</strong></td>
-                    <td>${pharmacist.city}</td>
-                    <td>${pharmacist.district}</td>
-                    <td>${pharmacist.supervisor}</td>
-                    <td><strong>${pharmacist.course}</strong></td>
-                    <td>
-                        <span class="status-badge ${pharmacist.courseType === 'Mandatory' ? 'course-mandatory' : 'course-optional'}">
-                            ${pharmacist.courseType}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${pharmacist.completion}%"></div>
-                        </div>
-                        <small><strong>${pharmacist.completion}%</strong></small>
-                    </td>
-                    <td>
-                        <span class="status-badge status-${pharmacist.status === 'Completed' ? 'completed' : pharmacist.status === 'In Progress' ? 'progress' : 'pending'}">
-                            ${pharmacist.status}
-                        </span>
-                    </td>
-                    <td>${pharmacist.dateCompleted}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Update all charts
-        function updateCharts() {
-            createCitiesChart();
-            createSupervisorsChart();
-            createCoursesChart();
-            createCourseTypesChart();
-            createDistrictsChart();
-            createPerformanceChart();
-            createStatusChart();
-        }
-
-        // Create cities chart
-        function createCitiesChart() {
-            const ctx = document.getElementById('citiesChart').getContext('2d');
-            
-            if (charts.cities) {
-                charts.cities.destroy();
-            }
-
-            const cityStats = {};
-            const citiesToShow = selectedCities.length > 0 ? selectedCities : [...new Set(filteredData.map(p => p.city).filter(city => city))];
-            
-            citiesToShow.forEach(city => {
-                const cityData = filteredData.filter(p => p.city === city);
-                if (cityData.length > 0) {
-                    cityStats[city] = {
-                        average: Math.round(cityData.reduce((sum, p) => sum + p.completion, 0) / cityData.length),
-                        count: cityData.length
-                    };
-                }
-            });
-
-            const labels = Object.keys(cityStats);
-            const averages = labels.map(city => cityStats[city].average);
-
-            charts.cities = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Average Completion Rate (%)',
-                        data: averages,
-                        backgroundColor: 'rgba(0, 102, 204, 0.8)',
-                        borderColor: 'rgba(0, 102, 204, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Completion Rate (%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create supervisors chart
-        function createSupervisorsChart() {
-            const ctx = document.getElementById('supervisorsChart').getContext('2d');
-            
-            if (charts.supervisors) {
-                charts.supervisors.destroy();
-            }
-
-            const supervisorStats = {};
-            const supervisorsToShow = selectedSupervisors.length > 0 ? selectedSupervisors : [...new Set(filteredData.map(p => p.supervisor).filter(supervisor => supervisor))];
-            
-            supervisorsToShow.forEach(supervisor => {
-                const supervisorData = filteredData.filter(p => p.supervisor === supervisor);
-                if (supervisorData.length > 0) {
-                    supervisorStats[supervisor] = {
-                        average: Math.round(supervisorData.reduce((sum, p) => sum + p.completion, 0) / supervisorData.length),
-                        count: supervisorData.length
-                    };
-                }
-            });
-
-            const labels = Object.keys(supervisorStats).map(name => name.replace('Dr. ', ''));
-            const averages = Object.values(supervisorStats).map(stat => stat.average);
-
-            charts.supervisors = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Average Completion Rate (%)',
-                        data: averages,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 205, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(153, 102, 255, 0.8)',
-                            'rgba(255, 159, 64, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 205, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Completion Rate (%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create courses chart
-        function createCoursesChart() {
-            const ctx = document.getElementById('coursesChart').getContext('2d');
-            
-            if (charts.courses) {
-                charts.courses.destroy();
-            }
-
-            const courseStats = {};
-            const coursesToShow = selectedCourses.length > 0 ? selectedCourses : [...new Set(filteredData.map(p => p.course).filter(course => course))];
-            
-            coursesToShow.forEach(course => {
-                const courseData = filteredData.filter(p => p.course === course);
-                if (courseData.length > 0) {
-                    courseStats[course] = {
-                        average: Math.round(courseData.reduce((sum, p) => sum + p.completion, 0) / courseData.length),
-                        count: courseData.length
-                    };
-                }
-            });
-
-            const labels = Object.keys(courseStats);
-            const averages = labels.map(course => courseStats[course].average);
-
-            charts.courses = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Average Completion Rate (%)',
-                        data: averages,
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(153, 102, 255, 0.8)',
-                            'rgba(255, 159, 64, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                maxRotation: 45
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Completion Rate (%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create course types chart
-        function createCourseTypesChart() {
-            const ctx = document.getElementById('courseTypesChart').getContext('2d');
-            
-            if (charts.courseTypes) {
-                charts.courseTypes.destroy();
-            }
-
-            const mandatoryData = filteredData.filter(p => p.courseType === 'Mandatory');
-            const optionalData = filteredData.filter(p => p.courseType === 'Optional');
-
-            const mandatoryAvg = mandatoryData.length > 0 ? 
-                Math.round(mandatoryData.reduce((sum, p) => sum + p.completion, 0) / mandatoryData.length) : 0;
-            const optionalAvg = optionalData.length > 0 ? 
-                Math.round(optionalData.reduce((sum, p) => sum + p.completion, 0) / optionalData.length) : 0;
-
-            charts.courseTypes = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Mandatory Courses', 'Optional Courses'],
-                    datasets: [{
-                        data: [mandatoryAvg, optionalAvg],
-                        backgroundColor: [
-                            'rgba(220, 53, 69, 0.8)',
-                            'rgba(40, 167, 69, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(220, 53, 69, 1)',
-                            'rgba(40, 167, 69, 1)'
-                        ],
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create districts chart
-        // Create districts chart
-function createDistrictsChart() {
-    const ctx = document.getElementById('districtsChart').getContext('2d');
-    
-    if (charts.districts) {
-        charts.districts.destroy();
-    }
-
-    const districtStats = {};
-    const districtsToShow = selectedDistricts.length > 0 
-        ? selectedDistricts 
-        : [...new Set(filteredData.map(p => p.district).filter(district => district))];
-    
-    districtsToShow.forEach(district => {
-        const districtData = filteredData.filter(p => p.district === district);
-        if (districtData.length > 0) {
-            districtStats[district] = Math.round(
-                districtData.reduce((sum, p) => sum + p.completion, 0) / districtData.length
-            );
-        }
+    trig.addEventListener('click',e=>{
+        e.stopPropagation();
+        const vis=drop.style.display==='block';
+        document.querySelectorAll('.multi-select-dropdown').forEach(d=>d.style.display='none');
+        drop.style.display=vis?'none':'block';
     });
+    document.addEventListener('click',e=>{
+        if(!cont.contains(e.target))drop.style.display='none';
+    });
+}
 
-    const labels = Object.keys(districtStats);
-    const averages = Object.values(districtStats);
+function updateSel(cont,arr,id){
+    cont.innerHTML='';
+    arr.forEach(item=>{
+        const sp=document.createElement('span');
+        sp.className='selected-item';
+        sp.innerHTML=`${item} <span class="remove-item">×</span>`;
+        sp.querySelector('.remove-item').addEventListener('click',e=>{
+            e.stopPropagation();
+            const idx=arr.indexOf(item);
+            if(idx>-1){
+                arr.splice(idx,1);
+                const cb=document.querySelector(`#${id} input[value="${item}"]`);
+                if(cb)cb.checked=false;
+                updateSel(cont,arr,id);
+                filter();
+            }
+        });
+        cont.appendChild(sp);
+    });
+    const trig=cont.parentElement.querySelector('.multi-select-trigger');
+    trig.textContent=arr.length===0?'Select...':`${arr.length} selected`;
+}
 
-    charts.districts = new Chart(ctx, {
-        type: 'bar', // 👈 Bar chart
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Completion Rate (%)',
-                data: averages,
-                backgroundColor: 'rgba(0, 102, 204, 0.7)',
-                borderColor: 'rgba(0, 102, 204, 1)',
-                borderWidth: 1
+function setupEvents(){
+    document.getElementById('statusFilter').addEventListener('change',filter);
+    document.getElementById('courseTypeFilter').addEventListener('change',filter);
+    document.getElementById('dateFrom').addEventListener('change',filter);
+    document.getElementById('dateTo').addEventListener('change',filter);
+    document.getElementById('clearFilters').addEventListener('click',clear);
+    document.getElementById('toggleTableBtn').addEventListener('click',toggle);
+    
+    const si=document.getElementById('pharmacistSearch');
+    const lc=document.getElementById('autocomplete-list');
+    si.addEventListener('input',function(){
+        const v=this.value.toLowerCase().trim();
+        lc.innerHTML='';
+        if(!v)return;
+        const m=data.filter(p=>p.name.toLowerCase().includes(v)||(p.email&&p.email.toLowerCase().includes(v)));
+        m.slice(0,10).forEach(p=>{
+            const it=document.createElement('div');
+            it.innerHTML=`<strong>${p.name}</strong>${p.email?' - '+p.email:''} - ${p.city}`;
+            it.addEventListener('click',()=>{
+                si.value=`${p.name}${p.email?' | '+p.email:''} | ${p.city}`;
+                lc.innerHTML='';
+                filter();
+            });
+            lc.appendChild(it);
+        });
+    });
+    document.addEventListener('click',e=>{
+        if(e.target!==si)lc.innerHTML='';
+    });
+}
+
+function filter(){
+    const st=document.getElementById('pharmacistSearch').value.toLowerCase();
+    const sf=document.getElementById('statusFilter').value;
+    const cf=document.getElementById('courseTypeFilter').value;
+    const df=document.getElementById('dateFrom').value;
+    const dt=document.getElementById('dateTo').value;
+    filtered=data.filter(p=>{
+        const fi=`${p.name}${p.email?' | '+p.email:''} | ${p.city}`.toLowerCase();
+        const ms=!st||fi.includes(st)||p.name.toLowerCase().includes(st)||(p.email&&p.email.toLowerCase().includes(st));
+        const mst=!sf||p.status===sf;
+        const mct=!cf||p.courseType===cf;
+        const mci=selC.length===0||selC.includes(p.city);
+        const msu=selS.length===0||selS.includes(p.supervisor);
+        const mdi=selD.length===0||selD.includes(p.district);
+        const mco=selCo.length===0||selCo.includes(p.course);
+        let md=true;
+        if(df||dt){
+            const pd=new Date(p.dateCompleted);
+            if(df&&pd<new Date(df))md=false;
+            if(dt&&pd>new Date(dt))md=false;
+        }
+        return ms&&mst&&mct&&mci&&msu&&mdi&&mco&&md;
+    });
+    update();
+}
+
+function clear(){
+    document.getElementById('pharmacistSearch').value='';
+    document.getElementById('statusFilter').value='';
+    document.getElementById('courseTypeFilter').value='';
+    document.getElementById('dateFrom').value='';
+    document.getElementById('dateTo').value='';
+    selC.length=0;
+    selS.length=0;
+    selD.length=0;
+    selCo.length=0;
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
+    document.querySelectorAll('.selected-items').forEach(c=>c.innerHTML='');
+    document.querySelectorAll('.multi-select-trigger').forEach(t=>t.textContent='Select...');
+    filtered=[...data];
+    update();
+}
+
+function toggle(){
+    const ts=document.getElementById('tableSection');
+    const tb=document.getElementById('toggleTableBtn');
+    if(ts.style.display==='none'){
+        ts.style.display='block';
+        tb.textContent='Hide Table';
+        tb.className='btn btn-primary';
+    }else{
+        ts.style.display='none';
+        tb.textContent='Show Table';
+        tb.className='btn btn-secondary';
+    }
+}
+
+function update(){
+    updateStats();
+    updateTable();
+    updateCharts();
+}
+
+function updateStats(){
+    const co=filtered.filter(p=>p.status==='Completed').length;
+    const pr=filtered.filter(p=>p.status==='In Progress').length;
+    const pe=filtered.filter(p=>p.status==='Pending').length;
+    const cc=filtered.filter(p=>p.status==='Completed');
+    const av=cc.length>0?Math.round(cc.reduce((s,p)=>s+p.completion,0)/cc.length):0;
+    document.getElementById('completedCount').textContent=co;
+    document.getElementById('progressCount').textContent=pr;
+    document.getElementById('pendingCount').textContent=pe;
+    document.getElementById('averageRate').textContent=av+'%';
+}
+
+function updateTable(){
+    const tb=document.getElementById('tableBody');
+    tb.innerHTML='';
+    filtered.forEach(p=>{
+        const r=document.createElement('tr');
+        r.innerHTML=`<td><strong>${p.name}</strong></td><td>${p.email||'-'}</td><td>${p.city}</td><td>${p.district}</td><td>${p.supervisor}</td><td><strong>${p.course}</strong></td><td><span class="status-badge ${p.courseType==='Mandatory'?'course-mandatory':'course-optional'}">${p.courseType}</span></td><td><div class="progress-bar"><div class="progress-fill" style="width:${p.completion}%"></div></div><small><strong>${p.completion}%</strong></small></td><td><span class="status-badge status-${p.status==='Completed'?'completed':p.status==='In Progress'?'progress':'pending'}">${p.status}</span></td><td>${p.dateCompleted}</td>`;
+        tb.appendChild(r);
+    });
+}
+
+function updateCharts(){
+    createChart('citiesChart','bar',selC.length>0?selC:[...new Set(filtered.map(p=>p.city).filter(c=>c))],'city');
+    createChart('supervisorsChart','bar',selS.length>0?selS:[...new Set(filtered.map(p=>p.supervisor).filter(s=>s))],'supervisor');
+    createChart('coursesChart','bar',selCo.length>0?selCo:[...new Set(filtered.map(p=>p.course).filter(c=>c))],'course');
+    createTypeChart();
+    createChart('districtsChart','bar',selD.length>0?selD:[...new Set(filtered.map(p=>p.district).filter(d=>d))],'district',true);
+    createTrendChart();
+    createStatusChart();
+}
+
+function createChart(id,type,items,field,horiz=false){
+    const ctx=document.getElementById(id).getContext('2d');
+    if(charts[id])charts[id].destroy();
+    const stats={};
+    items.forEach(item=>{
+        const d=filtered.filter(p=>p[field]===item);
+        if(d.length>0)stats[item]=Math.round(d.reduce((s,p)=>s+p.completion,0)/d.length);
+    });
+    const labels=Object.keys(stats);
+    const values=Object.values(stats);
+    charts[id]=new Chart(ctx,{
+        type,
+        data:{
+            labels,
+            datasets:[{
+                label:'Completion %',
+                data:values,
+                backgroundColor:'rgba(0,102,204,0.8)',
+                borderColor:'rgba(0,102,204,1)',
+                borderWidth:2
             }]
         },
-        options: {
-            indexAxis: 'y', // 👈 يخليها أفقية
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: '📍 Districts Performance'
-                },
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Completion Rate (%)'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Districts'
-                    }
-                }
+        options:{
+            indexAxis:horiz?'y':'x',
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{
+                [horiz?'x':'y']:{beginAtZero:true,max:100}
             }
         }
     });
 }
-        // Create performance trend chart
-        function createPerformanceChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            if (charts.performance) {
-                charts.performance.destroy();
-            }
 
-            // Generate trend data based on actual completion dates
-            const dateStats = {};
-            
-            filteredData.forEach(pharmacist => {
-                const date = pharmacist.dateCompleted;
-                if (date) {
-                    if (!dateStats[date]) {
-                        dateStats[date] = {
-                            total: 0,
-                            count: 0
-                        };
-                    }
-                    dateStats[date].total += pharmacist.completion;
-                    dateStats[date].count += 1;
-                }
-            });
-
-            // Sort dates and calculate averages
-            const sortedDates = Object.keys(dateStats).sort();
-            const dates = sortedDates.map(date => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            const completionRates = sortedDates.map(date => Math.round(dateStats[date].total / dateStats[date].count));
-
-            // If no data, show sample trend
-            if (dates.length === 0) {
-                for (let i = 30; i >= 0; i--) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                    
-                    const avgCompletion = filteredData.length > 0 
-                        ? Math.round(filteredData.reduce((sum, p) => sum + p.completion, 0) / filteredData.length)
-                        : 0;
-                    
-                    const variance = Math.random() * 20 - 10;
-                    completionRates.push(Math.max(0, Math.min(100, avgCompletion + variance)));
-                }
-            }
-
-            charts.performance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Daily Completion Rate (%)',
-                        data: completionRates,
-                        borderColor: 'rgba(0, 102, 204, 1)',
-                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Completion Rate (%)'
-                            }
-                        }
-                    }
-                }
-            });
+function createTypeChart(){
+    const ctx=document.getElementById('courseTypesChart').getContext('2d');
+    if(charts.courseTypes)charts.courseTypes.destroy();
+    const md=filtered.filter(p=>p.courseType==='Mandatory');
+    const od=filtered.filter(p=>p.courseType==='Optional');
+    const ma=md.length>0?Math.round(md.reduce((s,p)=>s+p.completion,0)/md.length):0;
+    const oa=od.length>0?Math.round(od.reduce((s,p)=>s+p.completion,0)/od.length):0;
+    charts.courseTypes=new Chart(ctx,{
+        type:'doughnut',
+        data:{
+            labels:['Mandatory','Optional'],
+            datasets:[{
+                data:[ma,oa],
+                backgroundColor:['rgba(220,53,69,0.8)','rgba(40,167,69,0.8)'],
+                borderWidth:3
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{position:'bottom'}}
         }
+    });
+}
 
-        // Create status distribution chart
-        function createStatusChart() {
-            const ctx = document.getElementById('statusChart').getContext('2d');
-            
-            if (charts.status) {
-                charts.status.destroy();
-            }
-
-            const completed = filteredData.filter(p => p.status === 'Completed').length;
-            const progress = filteredData.filter(p => p.status === 'In Progress').length;
-            const pending = filteredData.filter(p => p.status === 'Pending').length;
-
-            charts.status = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'In Progress', 'Pending'],
-                    datasets: [{
-                        data: [completed, progress, pending],
-                        backgroundColor: [
-                            'rgba(40, 167, 69, 0.8)',
-                            'rgba(255, 193, 7, 0.8)',
-                            'rgba(220, 53, 69, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(40, 167, 69, 1)',
-                            'rgba(255, 193, 7, 1)',
-                            'rgba(220, 53, 69, 1)'
-                        ],
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+function createTrendChart(){
+    const ctx=document.getElementById('performanceChart').getContext('2d');
+    if(charts.performance)charts.performance.destroy();
+    const ds={};
+    filtered.forEach(p=>{
+        if(p.dateCompleted){
+            if(!ds[p.dateCompleted])ds[p.dateCompleted]={t:0,c:0};
+            ds[p.dateCompleted].t+=p.completion;
+            ds[p.dateCompleted].c++;
         }
+    });
+    const sd=Object.keys(ds).sort();
+    const dates=sd.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    const rates=sd.map(d=>Math.round(ds[d].t/ds[d].c));
+    if(dates.length===0){
+        for(let i=30;i>=0;i--){
+            const d=new Date();
+            d.setDate(d.getDate()-i);
+            dates.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+            rates.push(Math.round(50+Math.random()*30));
+        }
+    }
+    charts.performance=new Chart(ctx,{
+        type:'line',
+        data:{
+            labels:dates,
+            datasets:[{
+                label:'Daily %',
+                data:rates,
+                borderColor:'rgba(0,102,204,1)',
+                backgroundColor:'rgba(0,102,204,0.1)',
+                tension:0.4,
+                fill:true
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{y:{beginAtZero:true,max:100}}
+        }
+    });
+}
 
-        // Initialize dashboard when page loads
-        document.addEventListener('DOMContentLoaded', initDashboard);
+function createStatusChart(){
+    const ctx=document.getElementById('statusChart').getContext('2d');
+    if(charts.status)charts.status.destroy();
+    const co=filtered.filter(p=>p.status==='Completed').length;
+    const pr=filtered.filter(p=>p.status==='In Progress').length;
+    const pe=filtered.filter(p=>p.status==='Pending').length;
+    charts.status=new Chart(ctx,{
+        type:'doughnut',
+        data:{
+            labels:['Completed','In Progress','Pending'],
+            datasets:[{
+                data:[co,pr,pe],
+                backgroundColor:['rgba(40,167,69,0.8)','rgba(255,193,7,0.8)','rgba(220,53,69,0.8)'],
+                borderWidth:3
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{legend:{position:'bottom'}}
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded',load);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
