@@ -89,7 +89,7 @@
             <div class="stat-card completed"><span class="icon">✅</span><div class="number" id="completedCount">0</div><div class="label">Completed</div></div>
             <div class="stat-card progress"><span class="icon">⏳</span><div class="number" id="progressCount">0</div><div class="label">In Progress</div></div>
             <div class="stat-card pending"><span class="icon">⏸️</span><div class="number" id="pendingCount">0</div><div class="label">Pending</div></div>
-            <div class="stat-card average"><span class="icon">📊</span><div class="number" id="averageRate">0%</div><div class="label">Average (Completed)</div></div>
+                            <div class="stat-card average"><span class="icon">📊</span><div class="number" id="averageRate">0%</div><div class="label">Completion Rate</div></div>
         </div>
         <div class="filters-section">
             <h3 style="margin-bottom:20px;color:#333;">🔍 Filters & Search</h3>
@@ -306,13 +306,31 @@ function filter(){
         const mco=selCo.length===0||selCo.includes(p.course);
         let md=true;
         if(df||dt){
-            const pd=new Date(p.dateCompleted);
-            if(df&&pd<new Date(df))md=false;
-            if(dt&&pd>new Date(dt))md=false;
+            if(p.dateCompleted){
+                const pd=parseDate(p.dateCompleted);
+                if(pd){
+                    if(df){const dfDate=new Date(df);if(pd<dfDate)md=false;}
+                    if(dt){const dtDate=new Date(dt);if(pd>dtDate)md=false;}
+                }else{md=false;}
+            }else{md=false;}
         }
         return ms&&me&&mst&&mct&&mci&&msu&&mdi&&mco&&md;
     });
     update();
+}
+
+function parseDate(dateStr){
+    if(!dateStr)return null;
+    let d=new Date(dateStr);
+    if(!isNaN(d.getTime()))return d;
+    const parts=dateStr.split(/[-/]/);
+    if(parts.length===3){
+        if(parts[0].length===4){d=new Date(parts[0],parts[1]-1,parts[2]);}
+        else if(parts[2].length===4){d=new Date(parts[2],parts[1]-1,parts[0]);}
+        else{d=new Date(parts[2],parts[0]-1,parts[1]);}
+        if(!isNaN(d.getTime()))return d;
+    }
+    return null;
 }
 
 function clear(){
@@ -357,8 +375,8 @@ function updateStats(){
     const co=filtered.filter(p=>p.status==='Completed').length;
     const pr=filtered.filter(p=>p.status==='In Progress').length;
     const pe=filtered.filter(p=>p.status==='Pending').length;
-    const cc=filtered.filter(p=>p.status==='Completed');
-    const av=cc.length>0?Math.round(cc.reduce((s,p)=>s+p.completion,0)/cc.length):0;
+    const total=co+pr+pe;
+    const av=total>0?Math.round((co/total)*100):0;
     document.getElementById('completedCount').textContent=co;
     document.getElementById('progressCount').textContent=pr;
     document.getElementById('pendingCount').textContent=pe;
@@ -450,13 +468,17 @@ function createTrendChart(){
     const ds={};
     filtered.forEach(p=>{
         if(p.dateCompleted){
-            if(!ds[p.dateCompleted])ds[p.dateCompleted]={t:0,c:0};
-            ds[p.dateCompleted].t+=p.completion;
-            ds[p.dateCompleted].c++;
+            const pd=parseDate(p.dateCompleted);
+            if(pd){
+                const dateKey=pd.toISOString().split('T')[0];
+                if(!ds[dateKey])ds[dateKey]={t:0,c:0};
+                ds[dateKey].t+=p.completion;
+                ds[dateKey].c++;
+            }
         }
     });
     const sd=Object.keys(ds).sort();
-    const dates=sd.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    const dates=sd.map(d=>{const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});});
     const rates=sd.map(d=>Math.round(ds[d].t/ds[d].c));
     if(dates.length===0){
         for(let i=30;i>=0;i--){
